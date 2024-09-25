@@ -1,0 +1,31 @@
+{
+    "name": "moss-replay",
+    "version": "0.1.0",
+    "description": "WebGL based replay for MOSS output",
+    "main": "index.js",
+    "scripts": {
+        "test": "echo \"Error: no test specified\" && exit 1"
+    },
+    "repository": {
+        "type": "git",
+        "url": "https://git.fiblab.net/sim/moss-replayer.git"
+    },
+    "author": "Jun Zhang",
+    "license": "MIT",
+    "dependencies": {
+        "@types/geojson": "^7946.0.14",
+        "@types/tinycolor2": "^1.4.6",
+        "antd": "^5.21.1",
+        "deck.gl": "^8.9.36",
+        "js-sdsl": "^4.4.2",
+        "react": "^18.3.1",
+        "react-dom": "^18.3.1",
+        "react-map-gl": "^6.1.21",
+        "tinycolor2": "^1.6.0"
+    },
+    "devDependencies": {
+        "@types/react": "^18.3.9",
+        "@types/react-dom": "^18.3.0",
+        "typescript": "^5.6.2"
+    }
+}

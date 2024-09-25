@@ -1,0 +1,418 @@
+import ReactDOMServer from 'react-dom/server'
+import { PauseOutlined, PlayCircleOutlined, StepBackwardOutlined, StepForwardOutlined, createFromIconfontCN } from "@ant-design/icons"
+import DeckGL from '@deck.gl/react/typed'
+import { FlyToInterpolator, WebMercatorViewport } from '@deck.gl/core/typed'
+import { GeoJsonLayer } from '@deck.gl/layers/typed'
+import { _MapContext as MapContext, NavigationControl, StaticMap } from 'react-map-gl'
+import React, { useState } from "react"
+import { Button, Form, Row, Col, Input, Slider, Space, Tooltip, Checkbox, InputNumber, App } from "antd"
+import usePlayer from "./_components/usePlayer"
+import moment from "moment"
+import { CarResponse } from './_components/players/Car'
+import { PedestrianResponse } from './_components/players/Pedestrian'
+import { RoadStatusResponse } from './_components/players/RoadStatus'
+import { TLResponse } from './_components/players/TrafficLight'
+import { LngLatBound, SimRaw } from './_components/type'
+
+const IconFont = createFromIconfontCN({
+    scriptUrl: "//at.alicdn.com/t/c/font_4473864_4oani4ws6sk.js",
+})
+
+const SPEED_MAP = [1, 2, 5, 10, 30, 60, 120, 300]
+
+export interface LngLat {
+    lng: number
+    lat: number
+}
+
+const InputJump = ({ onJump }: {
+    onJump: (center: LngLat) => void
+}) => {
+    return <Form
+        layout="inline"
+        onFinish={async (values: any) => {
+            onJump({
+                lng: parseFloat(values.lng),
+                lat: parseFloat(values.lat),
+            })
+        }}
+    >
+        <Form.Item name="lng">
+            <Input
+                type="number"
+                placeholder="Longitude"
+            />
+        </Form.Item>
+        <Form.Item name="lat">
+            <Input
+                type="number"
+                placeholder="Latitude"
+            />
+        </Form.Item>
+        <Button type="primary" htmlType="submit">
+            Fly To
+        </Button>
+    </Form>
+}
+
+export const Replay = (props: {
+    mapCenter: LngLat, // the current center of the map
+    onSetMapCenter: (center: LngLat) => void, // set the center of the map
+    onCarFetch: (startT: number, endT: number, bound?: LngLatBound) => Promise<{ data: CarResponse }>,
+    onPedestrianFetch: (startT: number, endT: number, bound?: LngLatBound) => Promise<{ data: PedestrianResponse }>,
+    onTLFetch: (startT: number, endT: number, bound?: LngLatBound) => Promise<{ data: TLResponse }>,
+    onRoadStatusFetch: (startT: number, endT: number, bound?: LngLatBound) => Promise<{ data: RoadStatusResponse }>,
+    aoiGeoJson: GeoJSON.Feature[], // the AOI GeoJSON
+    allLaneGeoJson: GeoJSON.Feature[], // all road lane GeoJSON
+    junctionLaneGeoJson: GeoJSON.Feature[], // junction road lane GeoJSON
+    roadGeoJson: GeoJSON.Feature[], // road GeoJSON
+    carModelPaths: { [model: string]: string },
+    defaultCarModelPath: string,
+    MapboxAccessToken: string, // the mapbox token
+    sim?: SimRaw, // the simulation data
+    deckHeight?: string | number, // deck高度
+}) => {
+    const { message } = App.useApp()
+
+    // internal state
+    const [hovering, setHovering] = useState(false)
+    const [pickable, setPickable] = useState(false)
+    const [mouse, setMouse] = useState<LngLat>({ lng: 0, lat: 0 })
+
+    // user input by GUI
+
+    const [sliderValue, setSliderValue] = useState<number | undefined>()
+    const [interpolation, setInterpolation] = useState(true)
+    const [openAoiLayer, setOpenAoiLayer] = useState(false)
+    const [openMoreLaneLayer, setOpenMoreLaneLayer] = useState(true)
+
+    const {
+        layers,
+        startT, endT,
+        t, setT,
+        playing, setPlaying,
+        setSpeed,
+        setBound,
+        openLayers, switchLayer,
+    } = usePlayer(
+        props.onCarFetch,
+        props.onPedestrianFetch,
+        props.onTLFetch,
+        props.onRoadStatusFetch,
+        props.junctionLaneGeoJson,
+        props.roadGeoJson,
+        props.carModelPaths,
+        props.defaultCarModelPath,
+        pickable, interpolation,
+        props.sim,
+    )
+
+    const layerButtons = (
+        <Space direction="horizontal" size="small">
+            <Checkbox
+                checked={interpolation}
+                onChange={(e: any) => {
+                    setInterpolation(e.target.checked)
+                    message.info("Please pause and restart to apply the frame changes!", 1)
+                }}
+            >
+                Interpolate
+            </Checkbox>
+            <Checkbox
+                checked={pickable}
+                onChange={(e: any) => setPickable(e.target.checked)}
+            >
+                Pick
+            </Checkbox>
+            <Tooltip placement="bottom" title="Vehicle | Pedestrian | Traffic Light">
+                <Button
+                    type={openLayers.has('micro') ? "link" : "text"}
+                    icon={<IconFont type='icon-car-fill' />}
+                    onClick={() => switchLayer('micro')}
+                />
+            </Tooltip>
+            <Tooltip placement="bottom" title="More Lane Information">
+                <Button
+                    type={openMoreLaneLayer ? "link" : "text"}
+                    icon={<IconFont type='icon-daolu' />}
+                    onClick={() => setOpenMoreLaneLayer((old) => {
+                        const next = !old
+                        if (next) {
+                            message.warning("Enabling this option may affect display performance, please note!", 1)
+                        }
+                        return next
+                    })}
+                />
+            </Tooltip>
+            <Tooltip placement="bottom" title="Road Status">
+                <Button
+                    type={openLayers.has('macro') ? "link" : "text"}
+                    icon={<IconFont type='icon-gaosu' />}
+                    onClick={() => switchLayer('macro')}
+                />
+            </Tooltip>
+            <Tooltip placement="bottom" title="AOI">
+                <Button
+                    type={openAoiLayer ? "link" : "text"}
+                    icon={<IconFont type='icon-community-line' />}
+                    onClick={() => setOpenAoiLayer((old) => !old)}
+                />
+            </Tooltip>
+        </Space>
+    )
+
+    if (openAoiLayer) {
+        layers.push(new GeoJsonLayer({
+            id: 'aoi',
+            data: props.aoiGeoJson,
+            stroked: true,
+            filled: true,
+            extruded: false,
+            lineWidthScale: 1,
+            lineWidthMinPixels: 1,
+            getLineColor: [230, 199, 168, 128],
+            getFillColor: [230, 199, 168, 64],
+            pickable: pickable,
+        }))
+    }
+
+    if (openMoreLaneLayer) {
+        layers.push(new GeoJsonLayer({
+            id: 'more-lane',
+            data: props.allLaneGeoJson,
+            stroked: true,
+            filled: true,
+            extruded: false,
+            lineWidthScale: 1,
+            lineWidthMinPixels: 1,
+            getLineColor: (f: any) => f.properties.type === 1 ? [0, 153, 204, 64] : [0, 153, 255, 32],
+            pickable: pickable,
+        }))
+    }
+
+    return (
+        <Row style={{ textAlign: 'center' }}>
+            <Col span={24}>
+                <Row style={{
+                    marginTop: "8px",
+                }} justify='center' align='middle'>
+                    <Col span={4}>
+                        {mouse.lng.toFixed(8)}{', '}{mouse.lat.toFixed(8)}
+                    </Col>
+                    <Space size='large'>
+                        <Col>
+                            <InputJump onJump={props.onSetMapCenter} />
+                        </Col>
+                        <Col>
+                            {layerButtons}
+                        </Col>
+                    </Space>
+                </Row>
+                <Row>
+                    <Col span={24}>
+                        <div style={{
+                            marginTop: "16px",
+                            height: props.deckHeight ?? "80vh",
+                            borderRadius: "16px 16px 0px 0px",
+                            boxShadow: "0px 4px 10px 0px rgba(80, 80, 80, 0.1)",
+                            position: 'relative',
+                        }}>
+                            <DeckGL
+                                initialViewState={{
+                                    longitude: props.mapCenter.lng,
+                                    latitude: props.mapCenter.lat,
+                                    zoom: 10.5,
+                                    pitch: 0,
+                                    bearing: 0,
+                                    transitionDuration: 2000,
+                                    transitionInterpolator: new FlyToInterpolator(),
+                                }}
+                                controller={true}
+                                layers={layers}
+                                onHover={(info: any) => {
+                                    const { object, coordinate } = info
+                                    setHovering(Boolean(object))
+                                    if (coordinate) {
+                                        setMouse({ lng: coordinate[0], lat: coordinate[1] })
+                                    } else {
+                                        setMouse({ lng: 0, lat: 0 })
+                                    }
+                                }}
+                                getCursor={() => hovering ? 'pointer' : 'grab'}
+                                getTooltip={({ object, layer }: any) => {
+                                    if (!object) {
+                                        return null
+                                    }
+                                    if (layer.id.startsWith('car')) {
+                                        // multi line html to show id, position, angle, v
+                                        const body = (
+                                            <div>
+                                                <p>
+                                                    Car {object.id}
+                                                    <br />
+                                                    Position: {object.position.join(', ')}
+                                                    <br />
+                                                    Angle: {object.angle.toFixed(2)} rad
+                                                    <br />
+                                                    Speed: {(object.v * 3.6).toFixed(2)} km/h
+                                                </p>
+                                            </div>
+                                        )
+                                        return {
+                                            html: ReactDOMServer.renderToString(body),
+                                            style: {
+                                                backgroundColor: 'rgba(255, 255, 255)',
+                                            }
+                                        }
+                                    }
+                                    if (layer.id.startsWith('pedestrian')) {
+                                        const body = (
+                                            <div>
+                                                <p>
+                                                    Pedestrian {object.id}
+                                                    <br />
+                                                    Position: {object.position.join(', ')}
+                                                    <br />
+                                                    Angle: {object.angle.toFixed(2)} rad
+                                                    <br />
+                                                    Speed: {(object.v * 3.6).toFixed(2)} km/h
+                                                </p>
+                                            </div>
+                                        )
+                                        return {
+                                            html: ReactDOMServer.renderToString(body),
+                                            style: {
+                                                backgroundColor: 'rgba(255, 255, 255)',
+                                            }
+                                        }
+                                    }
+                                    if (object.properties !== undefined) {
+                                        return {
+                                            html: `<pre>${JSON.stringify(object.properties, null, '  ')}</pre>`,
+                                            style: {
+                                                // backgroundColor: 'rgba(0, 0, 0, 0.5)',
+                                                color: 'black',
+                                                // 左对齐
+                                                textAlign: 'left',
+                                            }
+                                        }
+                                    }
+                                    return {
+                                        html: `<pre>${JSON.stringify(object, null, '  ')}</pre>`,
+                                        style: {
+                                            // backgroundColor: 'rgba(0, 0, 0, 0.5)',
+                                            color: 'black',
+                                            // 左对齐
+                                            textAlign: 'left',
+                                        }
+                                    }
+                                }}
+                                onViewStateChange={({ viewState }: any) => {
+                                    const viewport = new WebMercatorViewport(viewState)
+                                    const [lng1, lat2] = viewport.unproject([0, 0])
+                                    const [lng2, lat1] = viewport.unproject([viewport.width, viewport.height])
+                                    setBound({ lng1, lat1, lng2, lat2 })
+                                }}
+                                ContextProvider={MapContext.Provider as any}
+                            >
+                                <StaticMap mapboxApiAccessToken={props.MapboxAccessToken} />
+                                <NavigationControl style={{
+                                    position: 'absolute',
+                                    top: 10,
+                                    left: 10
+                                }} />
+                            </DeckGL>
+                        </div>
+                    </Col>
+                </Row>
+                <Row style={{ padding: "8px 0px 0px 0px" }}>
+                    <Col span={24}>
+                        <Space size={"large"}>
+                            {playing ? (
+                                <Button
+                                    icon={<PauseOutlined />}
+                                    onClick={() => setPlaying(false)}
+                                />
+                            ) : (
+                                <Button
+                                    icon={<PlayCircleOutlined />}
+                                    onClick={() => setPlaying(true)}
+                                />
+                            )}
+                            <Button
+                                icon={<StepBackwardOutlined />}
+                                onClick={() => setT(t + 1)}
+                            />
+                            <Button
+                                icon={<StepForwardOutlined />}
+                                onClick={() => setT(t - 1)}
+                            />
+
+                            <span>Speedup: </span>
+                            <Slider
+                                min={0}
+                                max={SPEED_MAP.length - 1}
+                                tooltip={{ formatter: (value?: number) => `${SPEED_MAP[value ?? 0]}` }}
+                                onChange={(value: any) => {
+                                    setSpeed(SPEED_MAP[value ?? 0])
+                                }}
+                                defaultValue={0}
+                                style={{ width: 60 }}
+                            /><span>Skip to: </span>
+                            <Form
+                                layout="inline"
+                                onFinish={(values: any) => {
+                                    const t = Number(values.goTime)
+                                    setT(t)
+                                }}
+                            >
+                                <Form.Item name="goTime">
+                                    <InputNumber
+                                        controls={false}
+                                        size="small"
+                                        style={{ width: 80 }}
+                                        placeholder="Frame"
+                                    />
+                                </Form.Item>
+                                <Button htmlType="submit">Goto</Button>
+                            </Form>
+                            <div>
+                                Play:
+                                {moment("00:00:00", "HH:mm:ss")
+                                    .add(startT, "seconds")
+                                    .format("HH:mm:ss")}
+                                /
+                                {moment("00:00:00", "HH:mm:ss")
+                                    .add(t, "seconds")
+                                    .format("HH:mm:ss")}
+                                /
+                                {moment("00:00:00", "HH:mm:ss")
+                                    .add(endT, "seconds")
+                                    .format("HH:mm:ss")}
+                            </div>
+                        </Space>
+                    </Col>
+                </Row>
+                <Row justify="space-around" align="middle">
+                    <Col span={2}>
+                        <span>Progress Bar</span>
+                    </Col>
+                    <Col span={20}>
+                        <Slider
+                            min={startT}
+                            max={endT}
+                            value={sliderValue ?? t}
+                            onChange={setSliderValue}
+                            onChangeComplete={(value: any) => {
+                                const t = Number(value)
+                                setT(t)
+                                setSliderValue(undefined)
+                            }}
+                        />
+                    </Col>
+                </Row>
+            </Col >
+        </Row >
+    )
+}
+
