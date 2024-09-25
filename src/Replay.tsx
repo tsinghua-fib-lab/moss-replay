@@ -5,7 +5,7 @@ import { FlyToInterpolator, WebMercatorViewport } from '@deck.gl/core/typed'
 import { GeoJsonLayer } from '@deck.gl/layers/typed'
 import { _MapContext as MapContext, NavigationControl, StaticMap } from 'react-map-gl'
 import React, { useState } from "react"
-import { Button, Form, Row, Col, Input, Slider, Space, Tooltip, Checkbox, InputNumber, App } from "antd"
+import { Button, Form, Row, Col, Input, Slider, Space, Tooltip, Checkbox, InputNumber, App, Flex } from "antd"
 import usePlayer from "./_components/usePlayer"
 import moment from "moment"
 import { CarResponse } from './_components/players/Car'
@@ -292,7 +292,7 @@ export const Replay = (props: {
                                         return {
                                             html: `<pre>${JSON.stringify(object.properties, null, '  ')}</pre>`,
                                             style: {
-                                                // backgroundColor: 'rgba(0, 0, 0, 0.5)',
+                                                backgroundColor: 'rgba(255, 255, 255)',
                                                 color: 'black',
                                                 // 左对齐
                                                 textAlign: 'left',
@@ -302,7 +302,7 @@ export const Replay = (props: {
                                     return {
                                         html: `<pre>${JSON.stringify(object, null, '  ')}</pre>`,
                                         style: {
-                                            // backgroundColor: 'rgba(0, 0, 0, 0.5)',
+                                            backgroundColor: 'rgba(255, 255, 255)',
                                             color: 'black',
                                             // 左对齐
                                             textAlign: 'left',
@@ -329,70 +329,78 @@ export const Replay = (props: {
                 </Row>
                 <Row style={{ padding: "8px 0px 0px 0px" }}>
                     <Col span={24}>
-                        <Space size={"large"}>
-                            {playing ? (
-                                <Button
-                                    icon={<PauseOutlined />}
-                                    onClick={() => setPlaying(false)}
-                                />
-                            ) : (
-                                <Button
-                                    icon={<PlayCircleOutlined />}
-                                    onClick={() => setPlaying(true)}
-                                />
-                            )}
-                            <Button
-                                icon={<StepBackwardOutlined />}
-                                onClick={() => setT(t + 1)}
-                            />
-                            <Button
-                                icon={<StepForwardOutlined />}
-                                onClick={() => setT(t - 1)}
-                            />
-
-                            <span>Speedup: </span>
-                            <Slider
-                                min={0}
-                                max={SPEED_MAP.length - 1}
-                                tooltip={{ formatter: (value?: number) => `${SPEED_MAP[value ?? 0]}` }}
-                                onChange={(value: any) => {
-                                    setSpeed(SPEED_MAP[value ?? 0])
-                                }}
-                                defaultValue={0}
-                                style={{ width: 60 }}
-                            /><span>Skip to: </span>
-                            <Form
-                                layout="inline"
-                                onFinish={(values: any) => {
-                                    const t = Number(values.goTime)
-                                    setT(t)
-                                }}
-                            >
-                                <Form.Item name="goTime">
-                                    <InputNumber
-                                        controls={false}
-                                        size="small"
-                                        style={{ width: 80 }}
-                                        placeholder="Frame"
+                        <Flex gap="middle" justify="center" align="center">
+                            <Space size="small">
+                                {playing ? (
+                                    <Button
+                                        icon={<PauseOutlined />}
+                                        onClick={() => setPlaying(false)}
                                     />
-                                </Form.Item>
-                                <Button htmlType="submit">Goto</Button>
-                            </Form>
-                            <div>
-                                Play:
-                                {moment("00:00:00", "HH:mm:ss")
-                                    .add(startT, "seconds")
-                                    .format("HH:mm:ss")}
-                                /
-                                {moment("00:00:00", "HH:mm:ss")
-                                    .add(t, "seconds")
-                                    .format("HH:mm:ss")}
-                                /
-                                {moment("00:00:00", "HH:mm:ss")
-                                    .add(endT, "seconds")
-                                    .format("HH:mm:ss")}
-                            </div>
-                        </Space>
+                                ) : (
+                                    <Button
+                                        icon={<PlayCircleOutlined />}
+                                        onClick={() => setPlaying(true)}
+                                    />
+                                )}
+                                <Button
+                                    icon={<StepBackwardOutlined />}
+                                    onClick={() => setT(t + 1)}
+                                />
+                                <Button
+                                    icon={<StepForwardOutlined />}
+                                    onClick={() => setT(t - 1)}
+                                />
+                            </Space>
+                            <Space size="small">
+                                <span>Speedup: </span>
+                                <Slider
+                                    min={0}
+                                    max={SPEED_MAP.length - 1}
+                                    tooltip={{ formatter: (value?: number) => `${SPEED_MAP[value ?? 0]}` }}
+                                    onChange={(value: any) => {
+                                        setSpeed(SPEED_MAP[value ?? 0])
+                                    }}
+                                    defaultValue={0}
+                                    style={{ width: 60 }}
+                                />
+                            </Space>
+                            <Space size="small">
+                                <span>Skip to: </span>
+                                <Form
+                                    layout="inline"
+                                    onFinish={(values: any) => {
+                                        const t = Number(values.goTime)
+                                        setT(t)
+                                    }}
+                                >
+                                    <Form.Item name="goTime">
+                                        <InputNumber
+                                            controls={false}
+                                            size="small"
+                                            style={{ width: 80 }}
+                                            placeholder="Frame"
+                                        />
+                                    </Form.Item>
+                                    <Button htmlType="submit">Goto</Button>
+                                </Form>
+                            </Space>
+                            <Space size="small">
+                                <div>
+                                    Play:
+                                    {moment("00:00:00", "HH:mm:ss")
+                                        .add(startT, "seconds")
+                                        .format("HH:mm:ss")}
+                                    /
+                                    {moment("00:00:00", "HH:mm:ss")
+                                        .add(t, "seconds")
+                                        .format("HH:mm:ss")}
+                                    /
+                                    {moment("00:00:00", "HH:mm:ss")
+                                        .add(endT, "seconds")
+                                        .format("HH:mm:ss")}
+                                </div>
+                            </Space>
+                        </Flex>
                     </Col>
                 </Row>
                 <Row justify="space-around" align="middle">
