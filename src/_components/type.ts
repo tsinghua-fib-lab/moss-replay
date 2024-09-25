@@ -10,3 +10,10 @@ export type SimRaw = {
     start: number;
     steps: number;
 }
+
+export interface MessageHandler {
+    success: (message: string, duration: number) => void
+    info: (message: string, duration: number) => void
+    warning: (message: string, duration: number) => void
+    error: (message: string, duration: number) => void
+}

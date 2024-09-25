@@ -12,7 +12,7 @@ import { CarResponse } from './_components/players/Car'
 import { PedestrianResponse } from './_components/players/Pedestrian'
 import { RoadStatusResponse } from './_components/players/RoadStatus'
 import { TLResponse } from './_components/players/TrafficLight'
-import { LngLatBound, SimRaw } from './_components/type'
+import { LngLatBound, MessageHandler, SimRaw } from './_components/type'
 
 const IconFont = createFromIconfontCN({
     scriptUrl: "//at.alicdn.com/t/c/font_4473864_4oani4ws6sk.js",
@@ -55,7 +55,10 @@ const InputJump = ({ onJump }: {
     </Form>
 }
 
+
+
 export const Replay = (props: {
+    sim: SimRaw | undefined, // the simulation data
     mapCenter: LngLat, // the current center of the map
     onSetMapCenter: (center: LngLat) => void, // set the center of the map
     onCarFetch: (startT: number, endT: number, bound?: LngLatBound) => Promise<{ data: CarResponse }>,
@@ -68,12 +71,10 @@ export const Replay = (props: {
     roadGeoJson: GeoJSON.Feature[], // road GeoJSON
     carModelPaths: { [model: string]: string },
     defaultCarModelPath: string,
-    MapboxAccessToken: string, // the mapbox token
-    sim?: SimRaw, // the simulation data
+    mapboxAccessToken: string, // the mapbox token
+    message: MessageHandler,
     deckHeight?: string | number, // deck高度
 }) => {
-    const { message } = App.useApp()
-
     // internal state
     const [hovering, setHovering] = useState(false)
     const [pickable, setPickable] = useState(false)
@@ -95,6 +96,7 @@ export const Replay = (props: {
         setBound,
         openLayers, switchLayer,
     } = usePlayer(
+        props.sim,
         props.onCarFetch,
         props.onPedestrianFetch,
         props.onTLFetch,
@@ -104,7 +106,7 @@ export const Replay = (props: {
         props.carModelPaths,
         props.defaultCarModelPath,
         pickable, interpolation,
-        props.sim,
+        props.message,
     )
 
     const layerButtons = (
@@ -113,7 +115,7 @@ export const Replay = (props: {
                 checked={interpolation}
                 onChange={(e: any) => {
                     setInterpolation(e.target.checked)
-                    message.info("Please pause and restart to apply the frame changes!", 1)
+                    props.message.info("Please pause and restart to apply the frame changes!", 1)
                 }}
             >
                 Interpolate
@@ -138,7 +140,7 @@ export const Replay = (props: {
                     onClick={() => setOpenMoreLaneLayer((old) => {
                         const next = !old
                         if (next) {
-                            message.warning("Enabling this option may affect display performance, please note!", 1)
+                            props.message.warning("Enabling this option may affect display performance, please note!", 1)
                         }
                         return next
                     })}
@@ -315,7 +317,7 @@ export const Replay = (props: {
                                 }}
                                 ContextProvider={MapContext.Provider as any}
                             >
-                                <StaticMap mapboxApiAccessToken={props.MapboxAccessToken} />
+                                <StaticMap mapboxApiAccessToken={props.mapboxAccessToken} />
                                 <NavigationControl style={{
                                     position: 'absolute',
                                     top: 10,

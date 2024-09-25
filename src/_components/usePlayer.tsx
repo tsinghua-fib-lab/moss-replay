@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { Layer } from "@deck.gl/core/typed";
 import { RoadStatusPlayer, RoadStatusResponse } from "./players/RoadStatus";
-import { LngLatBound, SimRaw } from "./type";
+import { LngLatBound, MessageHandler, SimRaw } from "./type";
 import { message } from "antd";
 import { TLPlayer, TLResponse } from "./players/TrafficLight";
 import { PedestrianPlayer, PedestrianResponse } from "./players/Pedestrian";
@@ -12,6 +12,7 @@ import { CarPlayer, CarResponse } from "./players/Car";
 // pickable: 是否可选中
 // interpolation: 是否插值
 const usePlayer = (
+    sim: SimRaw | undefined,
     onCarFetch: (startT: number, endT: number, bound?: LngLatBound) => Promise<{ data: CarResponse }>,
     onPedestrianFetch: (startT: number, endT: number, bound?: LngLatBound) => Promise<{ data: PedestrianResponse }>,
     onTLFetch: (startT: number, endT: number, bound?: LngLatBound) => Promise<{ data: TLResponse }>,
@@ -22,7 +23,7 @@ const usePlayer = (
     defaultCarModelPath: string,
     pickable: boolean,
     interpolation: boolean,
-    sim?: SimRaw,
+    message: MessageHandler,
 ) => {
     // 控制状态
     const [playing, setPlaying] = useState<boolean>(false);
@@ -88,7 +89,7 @@ const usePlayer = (
                 carPlayer.current.init(),
             ]);
             setLayers([]);
-            message.success(`${sim.name} loaded`);
+            message.success(`${sim.name} loaded`, 1);
         };
         fetchSim();
 

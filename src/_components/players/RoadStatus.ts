@@ -75,7 +75,7 @@ export class RoadStatusPlayer implements IPlayer {
         const data = this.geoJsonData.map(f => {
             const id = f.properties?.id ?? f.id;
             if (id === undefined) {
-                message.error("RoadStatusPlayer: 未找到id");
+                console.error("RoadStatusPlayer: 未找到id");
                 return f;
             }
             if (f.properties) {
