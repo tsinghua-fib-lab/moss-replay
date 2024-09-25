@@ -42,6 +42,10 @@ export class RoadStatusPlayer implements IPlayer {
     async init() {
     }
 
+    updateGeoJson(geoJson: GeoJSON.Feature[]) {
+        this.geoJsonData = geoJson;
+    }
+
     createRequests(startStep: number, prefetchNum: number, prefetchLength: number, bound?: LngLatBound) {
         const reqs: Frame[] = [];
         // 根据prefetchNum创建一系列请求并加入fetcher中

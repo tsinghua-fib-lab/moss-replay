@@ -95,6 +95,18 @@ const usePlayer = (
 
     }, [sim]);
 
+    useEffect(() => {
+        if (roadStatusPlayer.current) {
+            roadStatusPlayer.current.updateGeoJson(roadGeoJson);
+        }
+    }, [roadGeoJson]);
+
+    useEffect(() => {
+        if (tlPlayer.current) {
+            tlPlayer.current.updateGeoJson(junctionLaneGeoJson);
+        }
+    }, [junctionLaneGeoJson]);
+
     // 播放函数，每次播放一帧，改变layers
     const play = async () => {
         // 时间计算
