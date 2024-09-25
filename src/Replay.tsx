@@ -74,6 +74,7 @@ export const Replay = (props: {
     mapboxAccessToken: string, // the mapbox token
     message: MessageHandler,
     deckHeight?: string | number, // deck高度
+    extraHeader?: React.ReactNode, // 额外的头部
 }) => {
     // internal state
     const [hovering, setHovering] = useState(false)
@@ -198,17 +199,14 @@ export const Replay = (props: {
                 <Row style={{
                     marginTop: "8px",
                 }} justify='center' align='middle'>
-                    <Col span={4}>
-                        {mouse.lng.toFixed(8)}{', '}{mouse.lat.toFixed(8)}
-                    </Col>
-                    <Space size='large'>
-                        <Col>
-                            <InputJump onJump={props.onSetMapCenter} />
-                        </Col>
-                        <Col>
-                            {layerButtons}
-                        </Col>
-                    </Space>
+                    <Flex gap="middle" justify="center" align="center">
+                        <div>
+                            {mouse.lng.toFixed(8)}{', '}{mouse.lat.toFixed(8)}
+                        </div>
+                        <InputJump onJump={props.onSetMapCenter} />
+                        {layerButtons}
+                        {props.extraHeader}
+                    </Flex>
                 </Row>
                 <Row>
                     <Col span={24}>
