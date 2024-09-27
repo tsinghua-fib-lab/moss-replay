@@ -354,11 +354,11 @@ export const Replay = (props: {
                                 )}
                                 <Button
                                     icon={<StepBackwardOutlined />}
-                                    onClick={() => setT(t - 1)}
+                                    onClick={async () => await setT(t - 1)}
                                 />
                                 <Button
                                     icon={<StepForwardOutlined />}
-                                    onClick={() => setT(t + 1)}
+                                    onClick={async () => await setT(t + 1)}
                                 />
                             </Space>
                             <Space size="small">
@@ -378,9 +378,9 @@ export const Replay = (props: {
                                 <span>Skip to: </span>
                                 <Form
                                     layout="inline"
-                                    onFinish={(values: any) => {
+                                    onFinish={async (values: any) => {
                                         const t = Number(values.goTime)
-                                        setT(t)
+                                        await setT(t)
                                     }}
                                 >
                                     <Form.Item name="goTime">
@@ -423,9 +423,9 @@ export const Replay = (props: {
                             max={endT}
                             value={sliderValue ?? t}
                             onChange={setSliderValue}
-                            onChangeComplete={(value: any) => {
+                            onChangeComplete={async (value: any) => {
                                 const t = Number(value)
-                                setT(t)
+                                await setT(t)
                                 setSliderValue(undefined)
                             }}
                         />

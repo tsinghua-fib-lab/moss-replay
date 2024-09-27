@@ -101,6 +101,7 @@ const usePlayer = (
 
     // 播放函数，每次播放一帧，改变layers
     const play = async (forceT?: number) => {
+        console.log("forceT", forceT);
         // 时间计算
         const nowMs = performance.now();
         if (forceT !== undefined) {
@@ -157,6 +158,7 @@ const usePlayer = (
     useEffect(() => {
         if (playing) {
             lastT.current = performance.now();
+            console.log("start play, set lastT to", lastT.current);
             play();
         } else {
             if (aniHandler.current) {
@@ -172,11 +174,11 @@ const usePlayer = (
         }
     }, [playing]);
 
-    const setT = (newT: number) => {
+    const setT = async (newT: number) => {
         if (playing) {
             t.current = newT;
         } else {
-            play(newT);
+            await play(newT);
         }
     }
 
