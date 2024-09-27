@@ -117,7 +117,6 @@ export const Replay = (props: {
                 checked={interpolation}
                 onChange={(e: any) => {
                     setInterpolation(e.target.checked)
-                    props.message.info("Please pause and restart to apply the frame changes!", 1)
                 }}
             >
                 Interpolate
