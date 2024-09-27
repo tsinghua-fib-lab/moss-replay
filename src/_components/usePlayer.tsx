@@ -2,7 +2,6 @@ import { useEffect, useRef, useState } from "react";
 import { Layer } from "@deck.gl/core/typed";
 import { RoadStatusPlayer, RoadStatusResponse } from "./players/RoadStatus";
 import { LngLatBound, MessageHandler, SimRaw } from "./type";
-import { message } from "antd";
 import { TLPlayer, TLResponse } from "./players/TrafficLight";
 import { PedestrianPlayer, PedestrianResponse } from "./players/Pedestrian";
 import { IPlayer } from "./players/interface";
@@ -101,7 +100,6 @@ const usePlayer = (
 
     // 播放函数，每次播放一帧，改变layers
     const play = async (forceT?: number) => {
-        console.log("forceT", forceT);
         // 时间计算
         const nowMs = performance.now();
         if (forceT !== undefined) {
@@ -150,7 +148,9 @@ const usePlayer = (
 
         if (forceT === undefined) {
             // 循环播放
-            aniHandler.current = requestAnimationFrame(play);
+            aniHandler.current = requestAnimationFrame(() => {
+                play();
+            });
         }
     };
 
@@ -158,7 +158,6 @@ const usePlayer = (
     useEffect(() => {
         if (playing) {
             lastT.current = performance.now();
-            console.log("start play, set lastT to", lastT.current);
             play();
         } else {
             if (aniHandler.current) {
