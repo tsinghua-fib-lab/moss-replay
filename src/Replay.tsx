@@ -78,19 +78,19 @@ export const Replay = (props: {
 }) => {
     // internal state
     const [hovering, setHovering] = useState(false)
-    const [pickable, setPickable] = useState(false)
     const [mouse, setMouse] = useState<LngLat>({ lng: 0, lat: 0 })
 
     // user input by GUI
 
     const [sliderValue, setSliderValue] = useState<number | undefined>()
-    const [interpolation, setInterpolation] = useState(true)
-    const [openMicroLayer, setOpenMicroLayer] = useState(true)
-    const [openMacroLayer, setOpenMacroLayer] = useState(true)
     const [openAoiLayer, setOpenAoiLayer] = useState(false)
     const [openMoreLaneLayer, setOpenMoreLaneLayer] = useState(false)
 
     const {
+        openMicroLayer, setOpenMicroLayer,
+        openMacroLayer, setOpenMacroLayer,
+        interpolation, setInterpolation,
+        pickable, setPickable,
         layers,
         startT, endT,
         t, setT,
@@ -107,8 +107,6 @@ export const Replay = (props: {
         props.roadGeoJson,
         props.carModelPaths,
         props.defaultCarModelPath,
-        pickable, interpolation,
-        openMicroLayer, openMacroLayer,
         props.message,
     )
 
