@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { Layer } from "@deck.gl/core/typed";
 import { GeoJsonLayer } from '@deck.gl/layers/typed'
 import { RoadStatusPlayer, RoadStatusResponse } from "./players/RoadStatus";
-import { LngLatBound, MessageHandler, SimRaw } from "./type";
+import { LngLatBound, SimRaw } from "./type";
 import { TLPlayer, TLResponse } from "./players/TrafficLight";
 import { PedestrianPlayer, PedestrianResponse } from "./players/Pedestrian";
 import { IPlayer } from "./players/interface";
@@ -29,7 +29,6 @@ const usePlayer = (
     openAllLaneLayer: boolean,
     interpolation: boolean,
     pickable: boolean,
-    message: MessageHandler,
 ) => {
     // 控制状态
     const [playing, setPlaying] = useState<boolean>(false);
@@ -85,7 +84,7 @@ const usePlayer = (
                 carPlayer.current.init(),
             ]);
             setLayers([]);
-            message.success(`${sim.name} loaded`, 1);
+            await play(sim.start);
         };
         fetchSim();
 

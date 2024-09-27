@@ -110,7 +110,6 @@ export const Replay = (props: {
         openMicroLayer, openMacroLayer,
         openAoiLayer, openMoreLaneLayer,
         interpolation, pickable,
-        props.message,
     )
 
     const layerButtons = (
