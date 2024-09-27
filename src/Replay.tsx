@@ -1,6 +1,7 @@
 import ReactDOMServer from 'react-dom/server'
 import { PauseOutlined, PlayCircleOutlined, StepBackwardOutlined, StepForwardOutlined, createFromIconfontCN } from "@ant-design/icons"
 import DeckGL from '@deck.gl/react/typed'
+import { Layer } from "@deck.gl/core/typed";
 import { FlyToInterpolator, WebMercatorViewport } from '@deck.gl/core/typed'
 import { GeoJsonLayer } from '@deck.gl/layers/typed'
 import { _MapContext as MapContext, NavigationControl, StaticMap } from 'react-map-gl'
@@ -163,9 +164,10 @@ export const Replay = (props: {
             </Tooltip>
         </Space>
     )
-
+    let allLayers: Layer<{}>[] = []
+    allLayers.push(...layers)
     if (openAoiLayer) {
-        layers.push(new GeoJsonLayer({
+        allLayers.push(new GeoJsonLayer({
             id: 'aoi',
             data: props.aoiGeoJson,
             stroked: true,
@@ -180,7 +182,7 @@ export const Replay = (props: {
     }
 
     if (openMoreLaneLayer) {
-        layers.push(new GeoJsonLayer({
+        allLayers.push(new GeoJsonLayer({
             id: 'more-lane',
             data: props.allLaneGeoJson,
             stroked: true,
