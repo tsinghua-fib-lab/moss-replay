@@ -200,9 +200,6 @@ export const Replay = (props: {
                     marginTop: "8px",
                 }} justify='center' align='middle'>
                     <Flex gap="middle" justify="center" align="center">
-                        <div>
-                            {mouse.lng.toFixed(8)}{', '}{mouse.lat.toFixed(8)}
-                        </div>
                         <InputJump onJump={props.onSetMapCenter} />
                         {layerButtons}
                         {props.extraHeader}
@@ -217,6 +214,19 @@ export const Replay = (props: {
                             boxShadow: "0px 4px 10px 0px rgba(80, 80, 80, 0.1)",
                             position: 'relative',
                         }}>
+                            <div style={{
+                                position: 'fixed',
+                                top: '10%',   // 根据需求调整距离底部的空间
+                                right: '23%',    // 根据需求调整距离右侧的空间
+                                width: 'auto',
+                                height: 'auto',
+                                zIndex: 1000,
+                                backgroundColor: 'rgba(255, 255, 255, 0.8)',
+                                borderRadius: '8px',
+                                alignItems: 'center',
+                            }}>
+                                <span style={{ padding: "8px", color: "#007AFF", fontSize: 24 }}>{mouse.lng.toFixed(8)}{', '}{mouse.lat.toFixed(8)}</span>
+                            </div>
                             <DeckGL
                                 initialViewState={{
                                     longitude: props.mapCenter.lng,
@@ -342,11 +352,11 @@ export const Replay = (props: {
                                 )}
                                 <Button
                                     icon={<StepBackwardOutlined />}
-                                    onClick={() => setT(t + 1)}
+                                    onClick={() => setT(t - 1)}
                                 />
                                 <Button
                                     icon={<StepForwardOutlined />}
-                                    onClick={() => setT(t - 1)}
+                                    onClick={() => setT(t + 1)}
                                 />
                             </Space>
                             <Space size="small">

@@ -30,9 +30,7 @@ const usePlayer = (
     const [startT, setStartT] = useState<number>(0);
     const [endT, setEndT] = useState<number>(0);
     const t = useRef<number>(0);
-    const setT = (newT: number) => {
-        t.current = newT;
-    }
+
     const speed = useRef<number>(1);
     const setSpeed = (newSpeed: number) => {
         speed.current = newSpeed;
@@ -108,14 +106,22 @@ const usePlayer = (
     }, [junctionLaneGeoJson]);
 
     // 播放函数，每次播放一帧，改变layers
-    const play = async () => {
+    const play = async (forceT?: number) => {
         // 时间计算
         const nowMs = performance.now();
-        const dt = (nowMs - lastT.current) * speed.current / 1000;
-        lastT.current = nowMs;
-        t.current = t.current + dt;
+        if (forceT !== undefined) {
+            lastT.current = nowMs;
+            t.current = forceT;
+        } else {
+            const dt = (nowMs - lastT.current) * speed.current / 1000;
+            lastT.current = nowMs;
+            t.current = t.current + dt;
+        }
         if (t.current < startT) {
             t.current = startT;
+        }
+        if (t.current > endT) {
+            t.current = endT;
         }
         const allPlayers: { [id: string]: IPlayer[] } = {
             macro: [roadStatusPlayer.current].filter(p => p !== undefined),
@@ -146,7 +152,10 @@ const usePlayer = (
             return;
         }
 
-        aniHandler.current = requestAnimationFrame(play);
+        if (forceT === undefined) {
+            // 循环播放
+            aniHandler.current = requestAnimationFrame(play);
+        }
     };
 
     // 当playing变更时，开始或停止播放
@@ -167,6 +176,14 @@ const usePlayer = (
             aniHandler.current = undefined;
         }
     }, [playing]);
+
+    const setT = (newT: number) => {
+        if (playing) {
+            t.current = newT;
+        } else {
+            play(newT);
+        }
+    }
 
     return {
         layers,
