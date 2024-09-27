@@ -23,6 +23,8 @@ const usePlayer = (
     defaultCarModelPath: string,
     pickable: boolean,
     interpolation: boolean,
+    openMicroLayer: boolean,
+    openMacroLayer: boolean,
     message: MessageHandler,
 ) => {
     // 控制状态
@@ -36,14 +38,6 @@ const usePlayer = (
         speed.current = newSpeed;
     }
     const lastT = useRef<number>(0);
-    const openLayers = useRef<Set<string>>(new Set(["micro"]));
-    const switchLayer = (key: string) => {
-        if (openLayers.current.has(key)) {
-            openLayers.current.delete(key);
-        } else {
-            openLayers.current.add(key);
-        }
-    }
 
     // 动画帧句柄
     const aniHandler = useRef<number | undefined>(undefined);
@@ -123,15 +117,16 @@ const usePlayer = (
         if (t.current > endT) {
             t.current = endT;
         }
-        const allPlayers: { [id: string]: IPlayer[] } = {
-            macro: [roadStatusPlayer.current].filter(p => p !== undefined),
-            micro: [tlPlayer.current, pedestrianPlayer.current, carPlayer.current].filter(p => p !== undefined),
-        };
-        const players: IPlayer[] = [];
-        for (const key of openLayers.current) {
-            const player = allPlayers[key];
-            players.push(...player.filter(p => p !== undefined));
+        let players: IPlayer[] = [];
+        if (openMicroLayer) {
+            players.push(tlPlayer.current as IPlayer);
+            players.push(pedestrianPlayer.current as IPlayer);
+            players.push(carPlayer.current as IPlayer);
         }
+        if (openMacroLayer) {
+            players.push(roadStatusPlayer.current as IPlayer);
+        }
+        players = players.filter(p => p !== undefined);
         // 播放计算
         const playT = interpolation ? t.current : Math.floor(t.current);
         await Promise.all(players.map(async player => {
@@ -198,8 +193,6 @@ const usePlayer = (
         t: t.current,
         setT,
         setBound,
-        openLayers: openLayers.current,
-        switchLayer,
     }
 }
 

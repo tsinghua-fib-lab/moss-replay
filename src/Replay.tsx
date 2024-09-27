@@ -85,8 +85,10 @@ export const Replay = (props: {
 
     const [sliderValue, setSliderValue] = useState<number | undefined>()
     const [interpolation, setInterpolation] = useState(true)
+    const [openMicroLayer, setOpenMicroLayer] = useState(true)
+    const [openMacroLayer, setOpenMacroLayer] = useState(true)
     const [openAoiLayer, setOpenAoiLayer] = useState(false)
-    const [openMoreLaneLayer, setOpenMoreLaneLayer] = useState(true)
+    const [openMoreLaneLayer, setOpenMoreLaneLayer] = useState(false)
 
     const {
         layers,
@@ -95,7 +97,6 @@ export const Replay = (props: {
         playing, setPlaying,
         setSpeed,
         setBound,
-        openLayers, switchLayer,
     } = usePlayer(
         props.sim,
         props.onCarFetch,
@@ -107,6 +108,7 @@ export const Replay = (props: {
         props.carModelPaths,
         props.defaultCarModelPath,
         pickable, interpolation,
+        openMicroLayer, openMacroLayer,
         props.message,
     )
 
@@ -129,9 +131,23 @@ export const Replay = (props: {
             </Checkbox>
             <Tooltip placement="bottom" title="Vehicle | Pedestrian | Traffic Light">
                 <Button
-                    type={openLayers.has('micro') ? "link" : "text"}
+                    type={openMicroLayer ? "link" : "text"}
                     icon={<IconFont type='icon-car-fill' />}
-                    onClick={() => switchLayer('micro')}
+                    onClick={() => setOpenMicroLayer((old) => !old)}
+                />
+            </Tooltip>
+            <Tooltip placement="bottom" title="Road Status">
+                <Button
+                    type={openMacroLayer ? "link" : "text"}
+                    icon={<IconFont type='icon-gaosu' />}
+                    onClick={() => setOpenMacroLayer((old) => !old)}
+                />
+            </Tooltip>
+            <Tooltip placement="bottom" title="AOI">
+                <Button
+                    type={openAoiLayer ? "link" : "text"}
+                    icon={<IconFont type='icon-community-line' />}
+                    onClick={() => setOpenAoiLayer((old) => !old)}
                 />
             </Tooltip>
             <Tooltip placement="bottom" title="More Lane Information">
@@ -145,20 +161,6 @@ export const Replay = (props: {
                         }
                         return next
                     })}
-                />
-            </Tooltip>
-            <Tooltip placement="bottom" title="Road Status">
-                <Button
-                    type={openLayers.has('macro') ? "link" : "text"}
-                    icon={<IconFont type='icon-gaosu' />}
-                    onClick={() => switchLayer('macro')}
-                />
-            </Tooltip>
-            <Tooltip placement="bottom" title="AOI">
-                <Button
-                    type={openAoiLayer ? "link" : "text"}
-                    icon={<IconFont type='icon-community-line' />}
-                    onClick={() => setOpenAoiLayer((old) => !old)}
                 />
             </Tooltip>
         </Space>
@@ -216,8 +218,8 @@ export const Replay = (props: {
                         }}>
                             <div style={{
                                 position: 'fixed',
-                                top: '10%',   // 根据需求调整距离底部的空间
-                                right: '23%',    // 根据需求调整距离右侧的空间
+                                top: '8%',   // 根据需求调整距离底部的空间
+                                right: '5%',    // 根据需求调整距离右侧的空间
                                 width: 'auto',
                                 height: 'auto',
                                 zIndex: 1000,
@@ -225,7 +227,7 @@ export const Replay = (props: {
                                 borderRadius: '8px',
                                 alignItems: 'center',
                             }}>
-                                <span style={{ padding: "8px", color: "#007AFF", fontSize: 24 }}>{mouse.lng.toFixed(8)}{', '}{mouse.lat.toFixed(8)}</span>
+                                <span style={{ padding: "8px", color: "#007AFF", fontSize: 16 }}>{mouse.lng.toFixed(8)}{', '}{mouse.lat.toFixed(8)}</span>
                             </div>
                             <DeckGL
                                 initialViewState={{
