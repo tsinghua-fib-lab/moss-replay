@@ -20,13 +20,12 @@ const usePlayer = (
     roadGeoJson: GeoJSON.Feature[],
     carModelPaths: { [model: string]: string },
     defaultCarModelPath: string,
+    openMicroLayer: boolean,
+    openMacroLayer: boolean,
+    interpolation: boolean,
+    pickable: boolean,
     message: MessageHandler,
 ) => {
-    // 图层状态
-    const [openMicroLayer, setOpenMicroLayer] = useState(true)
-    const [openMacroLayer, setOpenMacroLayer] = useState(true)
-    const [interpolation, setInterpolation] = useState(true)
-    const [pickable, setPickable] = useState(false)
     // 控制状态
     const [playing, setPlaying] = useState<boolean>(false);
     const [startT, setStartT] = useState<number>(0);
@@ -177,17 +176,15 @@ const usePlayer = (
     // 当控制开关变化时，启停播放
     useEffect(() => {
         if (playing) {
-            console.log("playing with option changed")
             if (aniHandler.current) {
                 cancelAnimationFrame(aniHandler.current);
             }
             aniHandler.current = undefined;
             play();
         } else {
-            console.log("not playing with option changed")
             play(t.current);
         }
-    }), [openMicroLayer, openMacroLayer, interpolation, pickable];
+    }, [openMicroLayer, openMacroLayer, interpolation, pickable]);
 
     const setT = async (newT: number) => {
         if (playing) {
@@ -198,10 +195,6 @@ const usePlayer = (
     }
 
     return {
-        openMicroLayer, setOpenMicroLayer,
-        openMacroLayer, setOpenMacroLayer,
-        interpolation, setInterpolation,
-        pickable, setPickable,
         layers,
         playing,
         setPlaying,
