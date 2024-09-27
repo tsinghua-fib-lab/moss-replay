@@ -1,12 +1,10 @@
 import ReactDOMServer from 'react-dom/server'
 import { PauseOutlined, PlayCircleOutlined, StepBackwardOutlined, StepForwardOutlined, createFromIconfontCN } from "@ant-design/icons"
 import DeckGL from '@deck.gl/react/typed'
-import { Layer } from "@deck.gl/core/typed";
 import { FlyToInterpolator, WebMercatorViewport } from '@deck.gl/core/typed'
-import { GeoJsonLayer } from '@deck.gl/layers/typed'
 import { _MapContext as MapContext, NavigationControl, StaticMap } from 'react-map-gl'
 import React, { useState } from "react"
-import { Button, Form, Row, Col, Input, Slider, Space, Tooltip, Checkbox, InputNumber, App, Flex } from "antd"
+import { Button, Form, Row, Col, Input, Slider, Space, Tooltip, Checkbox, InputNumber, Flex } from "antd"
 import usePlayer from "./_components/usePlayer"
 import moment from "moment"
 import { CarResponse } from './_components/players/Car'
