@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { Layer } from "@deck.gl/core/typed";
+import { GeoJsonLayer } from '@deck.gl/layers/typed'
 import { RoadStatusPlayer, RoadStatusResponse } from "./players/RoadStatus";
 import { LngLatBound, MessageHandler, SimRaw } from "./type";
 import { TLPlayer, TLResponse } from "./players/TrafficLight";
@@ -18,10 +19,14 @@ const usePlayer = (
     onRoadStatusFetch: (startT: number, endT: number, bound?: LngLatBound) => Promise<{ data: RoadStatusResponse }>,
     junctionLaneGeoJson: GeoJSON.Feature[],
     roadGeoJson: GeoJSON.Feature[],
+    aoiGeoJson: GeoJSON.Feature[],
+    allLaneGeoJson: GeoJSON.Feature[],
     carModelPaths: { [model: string]: string },
     defaultCarModelPath: string,
     openMicroLayer: boolean,
     openMacroLayer: boolean,
+    openAoiLayer: boolean,
+    openAllLaneLayer: boolean,
     interpolation: boolean,
     pickable: boolean,
     message: MessageHandler,
@@ -134,6 +139,33 @@ const usePlayer = (
         const layers = players
             .map(player => player.play(playT, pickable))
             .flat();
+        if (openAoiLayer) {
+            layers.push(new GeoJsonLayer({
+                id: 'aoi',
+                data: aoiGeoJson,
+                stroked: true,
+                filled: true,
+                extruded: false,
+                lineWidthScale: 1,
+                lineWidthMinPixels: 1,
+                getLineColor: [230, 199, 168, 128],
+                getFillColor: [230, 199, 168, 64],
+                pickable: pickable,
+            }))
+        }
+        if (openAllLaneLayer) {
+            layers.push(new GeoJsonLayer({
+                id: 'more-lane',
+                data: allLaneGeoJson,
+                stroked: true,
+                filled: true,
+                extruded: false,
+                lineWidthScale: 1,
+                lineWidthMinPixels: 1,
+                getLineColor: (f: any) => f.properties.type === 1 ? [0, 153, 204, 64] : [0, 153, 255, 32],
+                pickable: pickable,
+            }))
+        }
         setLayers(layers);
 
         // 播放结束
@@ -184,7 +216,7 @@ const usePlayer = (
         } else {
             play(t.current);
         }
-    }, [openMicroLayer, openMacroLayer, interpolation, pickable]);
+    }, [openMicroLayer, openMacroLayer, openAoiLayer, openAllLaneLayer, interpolation, pickable]);
 
     const setT = async (newT: number) => {
         if (playing) {

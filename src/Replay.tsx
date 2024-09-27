@@ -105,9 +105,12 @@ export const Replay = (props: {
         props.onRoadStatusFetch,
         props.junctionLaneGeoJson,
         props.roadGeoJson,
+        props.aoiGeoJson,
+        props.allLaneGeoJson,
         props.carModelPaths,
         props.defaultCarModelPath,
         openMicroLayer, openMacroLayer,
+        openAoiLayer, openMoreLaneLayer,
         interpolation, pickable,
         props.message,
     )
@@ -164,36 +167,6 @@ export const Replay = (props: {
             </Tooltip>
         </Space>
     )
-    let allLayers: Layer<{}>[] = []
-    allLayers.push(...layers)
-    if (openAoiLayer) {
-        allLayers.push(new GeoJsonLayer({
-            id: 'aoi',
-            data: props.aoiGeoJson,
-            stroked: true,
-            filled: true,
-            extruded: false,
-            lineWidthScale: 1,
-            lineWidthMinPixels: 1,
-            getLineColor: [230, 199, 168, 128],
-            getFillColor: [230, 199, 168, 64],
-            pickable: pickable,
-        }))
-    }
-
-    if (openMoreLaneLayer) {
-        allLayers.push(new GeoJsonLayer({
-            id: 'more-lane',
-            data: props.allLaneGeoJson,
-            stroked: true,
-            filled: true,
-            extruded: false,
-            lineWidthScale: 1,
-            lineWidthMinPixels: 1,
-            getLineColor: (f: any) => f.properties.type === 1 ? [0, 153, 204, 64] : [0, 153, 255, 32],
-            pickable: pickable,
-        }))
-    }
 
     return (
         <Row style={{ textAlign: 'center' }}>
