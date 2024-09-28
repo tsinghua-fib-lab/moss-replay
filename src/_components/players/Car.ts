@@ -1,4 +1,4 @@
-import { Fetcher, Frame } from "../Fetcher";
+import { Fetcher, Frame, FrameGroup } from "../Fetcher";
 import { LngLatBound } from "../type";
 import { Layer } from '@deck.gl/core/typed';
 import { ScenegraphLayer } from '@deck.gl/mesh-layers/typed';
@@ -8,7 +8,6 @@ import { angleInterp } from "../utils/math";
 // 车辆原始响应
 export interface CarRaw {
     id: number;
-    step: number;
     lat: number;
     lng: number;
     laneId: number;
@@ -17,14 +16,18 @@ export interface CarRaw {
     model: string;
 }
 
+export interface CarFrame extends Frame {
+    data: CarRaw[];
+}
+
 export class CarPlayer implements IPlayer {
-    onFetch: (startT: number, endT: number, bound?: LngLatBound) => Promise<{ data: CarRaw[] }>;
+    onFetch: (startT: number, endT: number, bound?: LngLatBound) => Promise<CarFrame[]>;
     fetcher: Fetcher = new Fetcher(3, 3);
     modelPaths: { [model: string]: string };
     defaultModelPath: string;
 
     constructor(
-        onFetch: (startT: number, endT: number, bound?: LngLatBound) => Promise<{ data: CarRaw[] }>,
+        onFetch: (startT: number, endT: number, bound?: LngLatBound) => Promise<CarFrame[]>,
         modelPaths: { [model: string]: string },
         defaultModelPath: string,
     ) {
@@ -37,13 +40,13 @@ export class CarPlayer implements IPlayer {
     }
 
     createRequests(startStep: number, prefetchNum: number, prefetchLength: number, bound?: LngLatBound) {
-        const reqs: Frame[] = [];
+        const reqs: FrameGroup[] = [];
         // 根据prefetchNum创建一系列请求并加入fetcher中
         for (let i = 0; i < prefetchNum; i++) {
             const begin = startStep + i * prefetchLength;
             const end = begin + prefetchLength;
             reqs.push({
-                startStep: begin, endStep: end,
+                startT: begin, endT: end,
                 promise: this.onFetch(begin, end, bound),
             });
         }
@@ -57,19 +60,24 @@ export class CarPlayer implements IPlayer {
     }
 
     play(t: number, pickable: boolean): Layer[] {
-        const res = this.fetcher.getWhenPlay(t, t + 2) as CarRaw[][];
-        const [f1, f2] = res;
+        const res = this.fetcher.getWhenPlay(t) as CarFrame[];
+        if (res.length === 0) {
+            return [];
+        }
+        const f1: CarFrame = res[0];
+        const f2: CarFrame = res[res.length - 1];
+
         // 第2帧转为map
         const f2Id2Raw: Map<number, CarRaw> = new Map();
-        for (const car of f2) {
+        for (const car of f2.data) {
             f2Id2Raw.set(car.id, car);
         }
         // 计算插值比例
-        const ratio = t - Math.floor(t);
+        const ratio = f2.t > f1.t ? (t - f1.t) / (f2.t - f1.t) : 0;
 
         const data: { [model: string]: { id: number, position: [number, number, number], angle: number, v: number }[] } = {};
         // 计算当前帧要呈现的所有车的位置
-        for (const p of f1) {
+        for (const p of f1.data) {
             let { lng, lat, direction, v } = p;
             // 检查第二帧
             const f2 = f2Id2Raw.get(p.id);

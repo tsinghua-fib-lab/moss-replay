@@ -1,4 +1,4 @@
-import { Fetcher, Frame } from "../Fetcher";
+import { Fetcher, Frame, FrameGroup } from "../Fetcher";
 import { LngLatBound } from "../type";
 import { Color, toRGBA } from "../utils/color";
 import { Layer } from '@deck.gl/core/typed';
@@ -10,6 +10,10 @@ export interface RoadStatusRaw {
     id: number;
     step: number;
     level: 0 | 1 | 2 | 3 | 4 | 5 | 6;
+}
+
+export interface RoadStatusFrame extends Frame {
+    data: RoadStatusRaw[];
 }
 
 const ALPHA = 0.5;
@@ -24,12 +28,12 @@ const LEVEL_COLORS = [
 ];
 
 export class RoadStatusPlayer implements IPlayer {
-    onFetch: (startT: number, endT: number, bound?: LngLatBound) => Promise<{ data: RoadStatusRaw[] }>;
+    onFetch: (startT: number, endT: number, bound?: LngLatBound) => Promise<RoadStatusFrame[]>;
     geoJsonData: GeoJSON.Feature[];
     fetcher: Fetcher = new Fetcher(3, 3);
 
     constructor(
-        onFetch: (startT: number, endT: number, bound?: LngLatBound) => Promise<{ data: RoadStatusRaw[] }>,
+        onFetch: (startT: number, endT: number, bound?: LngLatBound) => Promise<RoadStatusFrame[]>,
         roadGeoJson: GeoJSON.Feature[],
     ) {
         this.onFetch = onFetch;
@@ -44,13 +48,13 @@ export class RoadStatusPlayer implements IPlayer {
     }
 
     createRequests(startStep: number, prefetchNum: number, prefetchLength: number, bound?: LngLatBound) {
-        const reqs: Frame[] = [];
+        const reqs: FrameGroup[] = [];
         // 根据prefetchNum创建一系列请求并加入fetcher中
         for (let i = 0; i < prefetchNum; i++) {
             const begin = startStep + i * prefetchLength;
             const end = begin + prefetchLength;
             reqs.push({
-                startStep: begin, endStep: end,
+                startT: begin, endT: end,
                 promise: this.onFetch(begin, end, bound),
             });
         }
@@ -58,7 +62,7 @@ export class RoadStatusPlayer implements IPlayer {
     }
 
     async ready(t: number, bound: LngLatBound): Promise<void> {
-        await this.fetcher.fetch(t, t + 1, (timing: number, prefetchNum: number, prefetchLength: number) => {
+        await this.fetcher.fetch(t-1, t + 1, (timing: number, prefetchNum: number, prefetchLength: number) => {
             return this.createRequests(timing, prefetchNum, prefetchLength, bound);
         });
     }
@@ -68,7 +72,11 @@ export class RoadStatusPlayer implements IPlayer {
             return [];
         }
         // 格式转换并绘制路网
-        const res = this.fetcher.getWhenPlay(t, t + 1)[0] as RoadStatusRaw[];
+        const frames = this.fetcher.getWhenPlay(t) as RoadStatusFrame[];
+        if (frames.length === 0) {
+            return [];
+        }
+        const res = frames[0].data;
         const id2Color = new Map<number, Color>();
         for (const road of res) {
             id2Color.set(road.id, LEVEL_COLORS[road.level]);
