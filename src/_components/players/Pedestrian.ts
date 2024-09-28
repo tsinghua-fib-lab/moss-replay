@@ -28,7 +28,7 @@ export class PedestrianPlayer implements IPlayer {
         dtHint?: number,
     ) {
         this.onFetch = onFetch;
-        this.fetcher = new Fetcher(3, 3, dtHint ?? 1);
+        this.fetcher = new Fetcher(dtHint ?? 1, 3);
     }
 
     async init() {

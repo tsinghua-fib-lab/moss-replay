@@ -36,7 +36,7 @@ export class TLPlayer implements IPlayer {
     ) {
         this.onFetch = onFetch;
         this.geoJsonData = junctionLaneGeoJson;
-        this.fetcher = new Fetcher(3, 3, dtHint ?? 1);
+        this.fetcher = new Fetcher(dtHint ?? 1, 3);
     }
 
     async init() {

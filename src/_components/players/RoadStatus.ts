@@ -38,7 +38,7 @@ export class RoadStatusPlayer implements IPlayer {
     ) {
         this.onFetch = onFetch;
         this.geoJsonData = roadGeoJson;
-        this.fetcher = new Fetcher(3, 3, dtHint ?? 1);
+        this.fetcher = new Fetcher(dtHint ?? 1, 3);
     }
 
     async init() {

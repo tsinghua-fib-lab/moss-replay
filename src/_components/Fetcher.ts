@@ -14,14 +14,12 @@ export interface FrameGroup {
 
 export class Fetcher {
     dtHint: number; // 数据帧的时间间隔
-    prefetchNum: number; // 预取的未来数据数量
     prefetchLength: number; // 预取的未来数据t长度
 
     frameBuffer: Frame[] = []; // 按时间顺序存储最近几帧的连续数据（含预取数据），时间小于等于当前时间的数据将被自动清除
 
-    constructor(dtHint: number, prefetchNum: number, prefetchLength: number) {
+    constructor(dtHint: number, prefetchLength: number) {
         this.dtHint = dtHint;
-        this.prefetchNum = prefetchNum;
         this.prefetchLength = prefetchLength;
     }
 
