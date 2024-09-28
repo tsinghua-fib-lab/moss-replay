@@ -1,4 +1,3 @@
-import { message } from "antd";
 import { Fetcher, Frame } from "../Fetcher";
 import { LngLatBound } from "../type";
 import { Color, toRGBA } from "../utils/color";
