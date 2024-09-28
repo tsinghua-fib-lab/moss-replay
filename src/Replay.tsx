@@ -7,10 +7,10 @@ import React, { useState } from "react"
 import { Button, Form, Row, Col, Input, Slider, Space, Tooltip, Checkbox, InputNumber, Flex } from "antd"
 import usePlayer from "./_components/usePlayer"
 import moment from "moment"
-import { CarResponse } from './_components/players/Car'
-import { PedestrianResponse } from './_components/players/Pedestrian'
-import { RoadStatusResponse } from './_components/players/RoadStatus'
-import { TLResponse } from './_components/players/TrafficLight'
+import { CarRaw } from './_components/players/Car'
+import { PedestrianRaw } from './_components/players/Pedestrian'
+import { RoadStatusRaw } from './_components/players/RoadStatus'
+import { TLRaw } from './_components/players/TrafficLight'
 import { LngLatBound, MessageHandler, SimRaw } from './_components/type'
 
 const IconFont = createFromIconfontCN({
@@ -60,10 +60,10 @@ export const Replay = (props: {
     sim: SimRaw | undefined, // the simulation data
     mapCenter: LngLat, // the current center of the map
     onSetMapCenter: (center: LngLat) => void, // set the center of the map
-    onCarFetch: (startT: number, endT: number, bound?: LngLatBound) => Promise<{ data: CarResponse }>,
-    onPedestrianFetch: (startT: number, endT: number, bound?: LngLatBound) => Promise<{ data: PedestrianResponse }>,
-    onTLFetch: (startT: number, endT: number, bound?: LngLatBound) => Promise<{ data: TLResponse }>,
-    onRoadStatusFetch: (startT: number, endT: number, bound?: LngLatBound) => Promise<{ data: RoadStatusResponse }>,
+    onCarFetch: (startT: number, endT: number, bound?: LngLatBound) => Promise<{ data: CarRaw[] }>,
+    onPedestrianFetch: (startT: number, endT: number, bound?: LngLatBound) => Promise<{ data: PedestrianRaw[] }>,
+    onTLFetch: (startT: number, endT: number, bound?: LngLatBound) => Promise<{ data: TLRaw[] }>,
+    onRoadStatusFetch: (startT: number, endT: number, bound?: LngLatBound) => Promise<{ data: RoadStatusRaw[] }>,
     aoiGeoJson: GeoJSON.Feature[], // the AOI GeoJSON
     allLaneGeoJson: GeoJSON.Feature[], // all road lane GeoJSON
     junctionLaneGeoJson: GeoJSON.Feature[], // junction road lane GeoJSON

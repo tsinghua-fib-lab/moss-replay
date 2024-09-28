@@ -1,22 +1,22 @@
 import { useEffect, useRef, useState } from "react";
 import { Layer } from "@deck.gl/core/typed";
 import { GeoJsonLayer } from '@deck.gl/layers/typed'
-import { RoadStatusPlayer, RoadStatusResponse } from "./players/RoadStatus";
+import { RoadStatusPlayer, RoadStatusRaw } from "./players/RoadStatus";
 import { LngLatBound, SimRaw } from "./type";
-import { TLPlayer, TLResponse } from "./players/TrafficLight";
-import { PedestrianPlayer, PedestrianResponse } from "./players/Pedestrian";
+import { TLPlayer, TLRaw } from "./players/TrafficLight";
+import { PedestrianPlayer, PedestrianRaw } from "./players/Pedestrian";
 import { IPlayer } from "./players/interface";
-import { CarPlayer, CarResponse } from "./players/Car";
+import { CarPlayer, CarRaw } from "./players/Car";
 
 // sim: 模拟记录
 // pickable: 是否可选中
 // interpolation: 是否插值
 const usePlayer = (
     sim: SimRaw | undefined,
-    onCarFetch: (startT: number, endT: number, bound?: LngLatBound) => Promise<{ data: CarResponse }>,
-    onPedestrianFetch: (startT: number, endT: number, bound?: LngLatBound) => Promise<{ data: PedestrianResponse }>,
-    onTLFetch: (startT: number, endT: number, bound?: LngLatBound) => Promise<{ data: TLResponse }>,
-    onRoadStatusFetch: (startT: number, endT: number, bound?: LngLatBound) => Promise<{ data: RoadStatusResponse }>,
+    onCarFetch: (startT: number, endT: number, bound?: LngLatBound) => Promise<{ data: CarRaw[] }>,
+    onPedestrianFetch: (startT: number, endT: number, bound?: LngLatBound) => Promise<{ data: PedestrianRaw[] }>,
+    onTLFetch: (startT: number, endT: number, bound?: LngLatBound) => Promise<{ data: TLRaw[] }>,
+    onRoadStatusFetch: (startT: number, endT: number, bound?: LngLatBound) => Promise<{ data: RoadStatusRaw[] }>,
     junctionLaneGeoJson: GeoJSON.Feature[],
     roadGeoJson: GeoJSON.Feature[],
     aoiGeoJson: GeoJSON.Feature[],
