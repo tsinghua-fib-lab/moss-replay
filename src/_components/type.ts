@@ -1,3 +1,8 @@
+export interface LngLat {
+    lng: number
+    lat: number
+}
+
 export interface LngLatBound {
     lat1: number;
     lat2: number;

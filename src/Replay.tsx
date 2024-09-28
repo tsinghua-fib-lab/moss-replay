@@ -11,18 +11,13 @@ import { CarRaw } from './_components/players/Car'
 import { PedestrianRaw } from './_components/players/Pedestrian'
 import { RoadStatusRaw } from './_components/players/RoadStatus'
 import { TLRaw } from './_components/players/TrafficLight'
-import { LngLatBound, MessageHandler, SimRaw } from './_components/type'
+import { LngLat, LngLatBound, MessageHandler, SimRaw } from './_components/type'
 
 const IconFont = createFromIconfontCN({
     scriptUrl: "//at.alicdn.com/t/c/font_4473864_4oani4ws6sk.js",
 })
 
 const SPEED_MAP = [1, 2, 5, 10, 30, 60, 120, 300]
-
-export interface LngLat {
-    lng: number
-    lat: number
-}
 
 const InputJump = ({ onJump }: {
     onJump: (center: LngLat) => void
