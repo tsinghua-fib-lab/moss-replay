@@ -6,13 +6,11 @@ import { GeoJsonLayer } from '@deck.gl/layers/typed';
 import { IPlayer } from "./interface";
 
 // 信控原始响应
-export type RoadStatusRaw = {
-    id: number,
-    step: number,
-    level: 0 | 1 | 2 | 3 | 4 | 5 | 6,
+export interface RoadStatusRaw {
+    id: number;
+    step: number;
+    level: 0 | 1 | 2 | 3 | 4 | 5 | 6;
 }
-
-export type RoadStatusResponse = RoadStatusRaw[];
 
 const ALPHA = 0.5;
 const LEVEL_COLORS = [
@@ -26,12 +24,12 @@ const LEVEL_COLORS = [
 ];
 
 export class RoadStatusPlayer implements IPlayer {
-    onFetch: (startT: number, endT: number, bound?: LngLatBound) => Promise<{ data: RoadStatusResponse }>;
+    onFetch: (startT: number, endT: number, bound?: LngLatBound) => Promise<{ data: RoadStatusRaw[] }>;
     geoJsonData: GeoJSON.Feature[];
     fetcher: Fetcher = new Fetcher(3, 3);
 
     constructor(
-        onFetch: (startT: number, endT: number, bound?: LngLatBound) => Promise<{ data: RoadStatusResponse }>,
+        onFetch: (startT: number, endT: number, bound?: LngLatBound) => Promise<{ data: RoadStatusRaw[] }>,
         roadGeoJson: GeoJSON.Feature[],
     ) {
         this.onFetch = onFetch;
@@ -70,7 +68,7 @@ export class RoadStatusPlayer implements IPlayer {
             return [];
         }
         // 格式转换并绘制路网
-        const res = this.fetcher.getWhenPlay(t, t + 1)[0] as RoadStatusResponse;
+        const res = this.fetcher.getWhenPlay(t, t + 1)[0] as RoadStatusRaw[];
         const id2Color = new Map<number, Color>();
         for (const road of res) {
             id2Color.set(road.id, LEVEL_COLORS[road.level]);

@@ -6,27 +6,25 @@ import { IPlayer } from "./interface";
 import { angleInterp } from "../utils/math";
 
 // 车辆原始响应
-export type CarRaw = {
-    id: number,
-    step: number,
-    lat: number,
-    lng: number,
-    laneId: number,
-    direction: number,
-    v: number,
-    model: string,
+export interface CarRaw {
+    id: number;
+    step: number;
+    lat: number;
+    lng: number;
+    laneId: number;
+    direction: number;
+    v: number;
+    model: string;
 }
 
-export type CarResponse = CarRaw[];
-
 export class CarPlayer implements IPlayer {
-    onFetch: (startT: number, endT: number, bound?: LngLatBound) => Promise<{ data: CarResponse }>;
+    onFetch: (startT: number, endT: number, bound?: LngLatBound) => Promise<{ data: CarRaw[] }>;
     fetcher: Fetcher = new Fetcher(3, 3);
     modelPaths: { [model: string]: string };
     defaultModelPath: string;
 
     constructor(
-        onFetch: (startT: number, endT: number, bound?: LngLatBound) => Promise<{ data: CarResponse }>,
+        onFetch: (startT: number, endT: number, bound?: LngLatBound) => Promise<{ data: CarRaw[] }>,
         modelPaths: { [model: string]: string },
         defaultModelPath: string,
     ) {
@@ -59,7 +57,7 @@ export class CarPlayer implements IPlayer {
     }
 
     play(t: number, pickable: boolean): Layer[] {
-        const res = this.fetcher.getWhenPlay(t, t + 2) as CarResponse[];
+        const res = this.fetcher.getWhenPlay(t, t + 2) as CarRaw[][];
         const [f1, f2] = res;
         // 第2帧转为map
         const f2Id2Raw: Map<number, CarRaw> = new Map();

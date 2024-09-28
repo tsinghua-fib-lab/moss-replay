@@ -1,11 +1,11 @@
-export type LngLatBound = {
+export interface LngLatBound {
     lat1: number;
     lat2: number;
     lng1: number;
     lng2: number;
 }
 
-export type SimRaw = {
+export interface SimRaw {
     name: string;
     start: number;
     steps: number;

@@ -6,23 +6,21 @@ import { CylinderGeometry } from '@luma.gl/engine';
 import { IPlayer } from "./interface";
 
 // 原始响应
-export type PedestrianRaw = {
-    id: number,
-    step: number,
-    lat: number,
-    lng: number,
-    parentId: number,
-    direction: number,
-    v: number,
+export interface PedestrianRaw {
+    id: number;
+    step: number;
+    lat: number;
+    lng: number;
+    parentId: number;
+    direction: number;
+    v: number;
 }
 
-export type PedestrianResponse = PedestrianRaw[];
-
 export class PedestrianPlayer implements IPlayer {
-    onFetch: (startT: number, endT: number, bound?: LngLatBound) => Promise<{ data: PedestrianResponse }>;
+    onFetch: (startT: number, endT: number, bound?: LngLatBound) => Promise<{ data: PedestrianRaw[] }>;
     fetcher: Fetcher = new Fetcher(3, 3);
 
-    constructor(onFetch: (startT: number, endT: number, bound?: LngLatBound) => Promise<{ data: PedestrianResponse }>) {
+    constructor(onFetch: (startT: number, endT: number, bound?: LngLatBound) => Promise<{ data: PedestrianRaw[] }>) {
         this.onFetch = onFetch;
     }
 
@@ -50,7 +48,7 @@ export class PedestrianPlayer implements IPlayer {
     }
 
     play(t: number, pickable: boolean): Layer[] {
-        const res = this.fetcher.getWhenPlay(t, t + 2) as PedestrianResponse[];
+        const res = this.fetcher.getWhenPlay(t, t + 2) as PedestrianRaw[][];
         const [f1, f2] = res;
         // 第2帧转为map
         const f2Id2Raw: Map<number, PedestrianRaw> = new Map();

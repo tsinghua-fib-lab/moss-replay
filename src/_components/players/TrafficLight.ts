@@ -7,13 +7,11 @@ import { GeoJsonLayer } from '@deck.gl/layers/typed';
 import { IPlayer } from "./interface";
 
 // 信控原始响应
-export type TLRaw = {
-    id: number,
-    step: number,
-    state: 0 | 1 | 2 | 3,
+export interface TLRaw {
+    id: number;
+    step: number;
+    state: 0 | 1 | 2 | 3;
 }
-
-export type TLResponse = TLRaw[];
 
 const ALPHA = 0.5;
 const STATE_COLORS = [
@@ -24,12 +22,12 @@ const STATE_COLORS = [
 ];
 
 export class TLPlayer implements IPlayer {
-    onFetch: (startT: number, endT: number, bound?: LngLatBound) => Promise<{ data: TLResponse }>;
+    onFetch: (startT: number, endT: number, bound?: LngLatBound) => Promise<{ data: TLRaw[] }>;
     geoJsonData: GeoJSON.Feature[];
     fetcher: Fetcher = new Fetcher(3, 3);
 
     constructor(
-        onFetch: (startT: number, endT: number, bound?: LngLatBound) => Promise<{ data: TLResponse }>,
+        onFetch: (startT: number, endT: number, bound?: LngLatBound) => Promise<{ data: TLRaw[] }>,
         junctionLaneGeoJson: GeoJSON.Feature[],
     ) {
         this.onFetch = onFetch;
@@ -68,7 +66,7 @@ export class TLPlayer implements IPlayer {
             return [];
         }
         // 格式转换并绘制路网
-        const res = this.fetcher.getWhenPlay(t, t + 1)[0] as TLResponse;
+        const res = this.fetcher.getWhenPlay(t, t + 1)[0] as TLRaw[];
         const id2Color = new Map<number, Color>();
         for (const tl of res) {
             id2Color.set(tl.id, STATE_COLORS[tl.state]);
