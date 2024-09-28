@@ -37,11 +37,12 @@ export class Fetcher {
                 this.frameBuffer = [];
             }
             // 2. 清空frameBuffer中所有早于startT - dtHint的数据
-            while (this.frameBuffer.length > 0 && this.frameBuffer[0].t < startT - this.dtHint) {
+            while (this.frameBuffer.length > 0 && this.frameBuffer[0].t <= startT - this.dtHint) {
                 this.frameBuffer.shift();
             }
+            console.log(`Fetcher: buffer time range ${this.frameBuffer[0].t} - ${this.frameBuffer[this.frameBuffer.length - 1].t}, fetch time range ${startT} - ${endT}`);
             // 3. 如果frameBuffer中已经包含了[start, end]的所有数据，则不需要再发请求
-            if (this.frameBuffer.length > 0 && this.frameBuffer[this.frameBuffer.length - 1].t >= endT) {
+            if (this.frameBuffer.length > 0 && this.frameBuffer[this.frameBuffer.length - 1].t + this.dtHint > endT) {
                 return;
             }
             // 4. 否则请求获取剩下的数据
@@ -51,6 +52,7 @@ export class Fetcher {
         }
         // 2. 发送请求
         const prefetchNum = Math.ceil((endT - startT) / this.prefetchLength);
+        console.log(`Fetcher: fetch ${startT} - ${endT}, prefetchNum ${prefetchNum}`);
         const reqs = createRequests(startT, prefetchNum, this.prefetchLength);
         for (const req of reqs) {
             // 等待响应
