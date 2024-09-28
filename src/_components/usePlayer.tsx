@@ -104,6 +104,9 @@ const usePlayer = (
 
     // 播放函数，每次播放一帧，改变layers
     const play = async (forceT?: number) => {
+        if (!playing) {
+            return;
+        }
         // 时间计算
         const nowMs = performance.now();
         if (forceT !== undefined) {
