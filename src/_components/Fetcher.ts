@@ -67,6 +67,7 @@ export class Fetcher {
         // 按照时间顺序排序
         this.frameBuffer.sort((a, b) => a.t - b.t);
         log += `After: buffer time range ${this.frameBuffer[0].t} - ${this.frameBuffer[this.frameBuffer.length - 1].t}\n`;
+        console.log(log);
     }
 
     // 用于在play时获取t时刻的相关数据（当前帧或前后两帧，没找到则返回空数组）
