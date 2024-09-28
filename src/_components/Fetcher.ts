@@ -66,7 +66,7 @@ export class Fetcher {
         }
         // 按照时间顺序排序
         this.frameBuffer.sort((a, b) => a.t - b.t);
-        log += `After: buffer time range ${this.frameBuffer[0].t} - ${this.frameBuffer[this.frameBuffer.length - 1].t}\n`;
+        log += `After: buffer time range ${this.frameBuffer[0]?.t} - ${this.frameBuffer[this.frameBuffer.length - 1]?.t}\n`;
         console.log(log);
     }
 
