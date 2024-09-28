@@ -56,7 +56,7 @@ export class CarPlayer implements IPlayer {
     }
 
     async ready(t: number, bound: LngLatBound): Promise<void> {
-        await this.fetcher.fetch(t, t + 2, (t: number, prefetchNum: number, prefetchLength: number) => {
+        await this.fetcher.fetch(t, (t: number, prefetchNum: number, prefetchLength: number) => {
             return this.createRequests(t, prefetchNum, prefetchLength, bound);
         });
     }

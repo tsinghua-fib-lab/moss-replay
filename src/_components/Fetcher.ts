@@ -23,11 +23,15 @@ export class Fetcher {
         this.prefetchLength = prefetchLength;
     }
 
-    // 预读区间[start, end]的数据
-    async fetch(startT: number, endT: number, createRequests: (t: number, prefetchNum: number, prefetchLength: number) => FrameGroup[]) {
-        endT = Math.max(endT, startT + this.prefetchLength);
+    // 预读数据
+    // 使得frameBuffer中的数据满足以下条件：
+    // 1. [t-dtHint, t+dtHint]的数据都在frameBuffer中，以便在play时能够直接获取
+    // 2. 如果剩余数据不足[t-dtHint, t+prefetchLength]，则发送请求获取剩余数据，请求长度为prefetchLength
+    async fetch(t: number, createRequests: (t: number, prefetchNum: number, prefetchLength: number) => FrameGroup[]) {
+        let startT = t - this.dtHint;
+        const endT = t + this.prefetchLength;
         // 1. 检查frameBuffer
-        let log = `Fetcher: function call fetch(${startT}, ${endT})\n`;
+        let log = `Fetcher: function call fetch(${t}, ${endT})\n`;
         if (this.frameBuffer.length > 0) {
             const first = this.frameBuffer[0];
             // 1. 如果fetch的时间范围早于frameBuffer的时间范围，则清空frameBuffer
@@ -36,12 +40,12 @@ export class Fetcher {
                 this.frameBuffer = [];
             }
             // 2. 清空frameBuffer中所有早于startT - dtHint的数据
-            while (this.frameBuffer.length > 0 && this.frameBuffer[0].t <= startT - this.dtHint) {
+            while (this.frameBuffer.length > 0 && this.frameBuffer[0].t <= startT) {
                 this.frameBuffer.shift();
             }
-            log += `Fetcher: buffer time range ${this.frameBuffer[0].t} - ${this.frameBuffer[this.frameBuffer.length - 1].t}\n`;
+            log += `Fetcher: buffer time range ${this.frameBuffer[0]?.t} - ${this.frameBuffer[this.frameBuffer.length - 1]?.t}\n`;
             // 3. 如果frameBuffer中已经包含了[start, end]的所有数据，则不需要再发请求
-            if (this.frameBuffer.length > 0 && this.frameBuffer[this.frameBuffer.length - 1].t + this.dtHint > endT) {
+            if (this.frameBuffer.length > 0 && this.frameBuffer[this.frameBuffer.length - 1].t > endT) {
                 return;
             }
             // 4. 否则请求获取剩下的数据
@@ -50,9 +54,8 @@ export class Fetcher {
             }
         }
         // 2. 发送请求
-        const prefetchNum = Math.ceil((endT - startT) / this.prefetchLength);
-        log += `Sending requests: ${startT} - ${endT}, prefetchNum=${prefetchNum}\n`;
-        const reqs = createRequests(startT, prefetchNum, this.prefetchLength);
+        log += `Send request from ${startT} to ${endT}\n`;
+        const reqs = createRequests(startT, Math.ceil((endT - startT) / this.prefetchLength), this.prefetchLength);
         for (const req of reqs) {
             // 等待响应
             const newFrames = await req.promise;
@@ -62,8 +65,9 @@ export class Fetcher {
             }
             log += `Received ${newFrames.length} frames\n`;
         }
-        // 按照时间顺序排序
+        // 按照时间顺序排序且去重
         this.frameBuffer.sort((a, b) => a.t - b.t);
+        this.frameBuffer = this.frameBuffer.filter((frame, idx) => idx === 0 || frame.t !== this.frameBuffer[idx - 1].t);
         log += `After: buffer time range ${this.frameBuffer[0]?.t} - ${this.frameBuffer[this.frameBuffer.length - 1]?.t}\n`;
         console.log(log);
     }

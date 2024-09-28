@@ -61,7 +61,7 @@ export class TLPlayer implements IPlayer {
     }
 
     async ready(t: number, bound: LngLatBound): Promise<void> {
-        await this.fetcher.fetch(t, t + 2, (timing: number, prefetchNum: number, prefetchLength: number) => {
+        await this.fetcher.fetch(t, (timing: number, prefetchNum: number, prefetchLength: number) => {
             return this.createRequests(timing, prefetchNum, prefetchLength, bound);
         });
     }
