@@ -27,14 +27,16 @@ const STATE_COLORS = [
 export class TLPlayer implements IPlayer {
     onFetch: (startT: number, endT: number, bound?: LngLatBound) => Promise<TLFrame[]>;
     geoJsonData: GeoJSON.Feature[];
-    fetcher: Fetcher = new Fetcher(3, 3);
+    fetcher: Fetcher;
 
     constructor(
         onFetch: (startT: number, endT: number, bound?: LngLatBound) => Promise<TLFrame[]>,
         junctionLaneGeoJson: GeoJSON.Feature[],
+        dtHint?: number,
     ) {
         this.onFetch = onFetch;
         this.geoJsonData = junctionLaneGeoJson;
+        this.fetcher = new Fetcher(3, 3, dtHint ?? 1);
     }
 
     async init() {
@@ -59,7 +61,7 @@ export class TLPlayer implements IPlayer {
     }
 
     async ready(t: number, bound: LngLatBound): Promise<void> {
-        await this.fetcher.fetch(t - 1, t + 1, (timing: number, prefetchNum: number, prefetchLength: number) => {
+        await this.fetcher.fetch(t, t + 2, (timing: number, prefetchNum: number, prefetchLength: number) => {
             return this.createRequests(timing, prefetchNum, prefetchLength, bound);
         });
     }

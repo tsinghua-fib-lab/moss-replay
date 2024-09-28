@@ -22,7 +22,7 @@ export interface CarFrame extends Frame {
 
 export class CarPlayer implements IPlayer {
     onFetch: (startT: number, endT: number, bound?: LngLatBound) => Promise<CarFrame[]>;
-    fetcher: Fetcher = new Fetcher(3, 3);
+    fetcher: Fetcher;
     modelPaths: { [model: string]: string };
     defaultModelPath: string;
 
@@ -30,10 +30,12 @@ export class CarPlayer implements IPlayer {
         onFetch: (startT: number, endT: number, bound?: LngLatBound) => Promise<CarFrame[]>,
         modelPaths: { [model: string]: string },
         defaultModelPath: string,
+        dtHint?: number,
     ) {
         this.onFetch = onFetch;
         this.modelPaths = modelPaths;
         this.defaultModelPath = defaultModelPath;
+        this.fetcher = new Fetcher(3, 3, dtHint ?? 1);
     }
 
     async init() {

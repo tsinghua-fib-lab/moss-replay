@@ -21,10 +21,14 @@ export interface PedestrianFrame extends Frame {
 
 export class PedestrianPlayer implements IPlayer {
     onFetch: (startT: number, endT: number, bound?: LngLatBound) => Promise<PedestrianFrame[]>;
-    fetcher: Fetcher = new Fetcher(3, 3);
+    fetcher: Fetcher;
 
-    constructor(onFetch: (startT: number, endT: number, bound?: LngLatBound) => Promise<PedestrianFrame[]>) {
+    constructor(
+        onFetch: (startT: number, endT: number, bound?: LngLatBound) => Promise<PedestrianFrame[]>,
+        dtHint?: number,
+    ) {
         this.onFetch = onFetch;
+        this.fetcher = new Fetcher(3, 3, dtHint ?? 1);
     }
 
     async init() {
@@ -45,7 +49,7 @@ export class PedestrianPlayer implements IPlayer {
     }
 
     async ready(t: number, bound: LngLatBound): Promise<void> {
-        await this.fetcher.fetch(t - 1, t + 2, (t: number, prefetchNum: number, prefetchLength: number) => {
+        await this.fetcher.fetch(t, t + 2, (t: number, prefetchNum: number, prefetchLength: number) => {
             return this.createRequests(t, prefetchNum, prefetchLength, bound);
         });
     }

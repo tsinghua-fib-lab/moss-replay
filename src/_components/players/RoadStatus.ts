@@ -29,14 +29,16 @@ const LEVEL_COLORS = [
 export class RoadStatusPlayer implements IPlayer {
     onFetch: (startT: number, endT: number, bound?: LngLatBound) => Promise<RoadStatusFrame[]>;
     geoJsonData: GeoJSON.Feature[];
-    fetcher: Fetcher = new Fetcher(3, 3);
+    fetcher: Fetcher;
 
     constructor(
         onFetch: (startT: number, endT: number, bound?: LngLatBound) => Promise<RoadStatusFrame[]>,
         roadGeoJson: GeoJSON.Feature[],
+        dtHint?: number,
     ) {
         this.onFetch = onFetch;
         this.geoJsonData = roadGeoJson;
+        this.fetcher = new Fetcher(3, 3, dtHint ?? 1);
     }
 
     async init() {
@@ -61,7 +63,7 @@ export class RoadStatusPlayer implements IPlayer {
     }
 
     async ready(t: number, bound: LngLatBound): Promise<void> {
-        await this.fetcher.fetch(t-1, t + 1, (timing: number, prefetchNum: number, prefetchLength: number) => {
+        await this.fetcher.fetch(t, t + 2, (timing: number, prefetchNum: number, prefetchLength: number) => {
             return this.createRequests(timing, prefetchNum, prefetchLength, bound);
         });
     }

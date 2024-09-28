@@ -13,12 +13,14 @@ export interface FrameGroup {
 }
 
 export class Fetcher {
+    dtHint: number; // 数据帧的时间间隔
     prefetchNum: number; // 预取的未来数据数量
     prefetchLength: number; // 预取的未来数据t长度
 
     frameBuffer: Frame[] = []; // 按时间顺序存储最近几帧的连续数据（含预取数据），时间小于等于当前时间的数据将被自动清除
 
-    constructor(prefetchNum: number, prefetchLength: number) {
+    constructor(dtHint: number, prefetchNum: number, prefetchLength: number) {
+        this.dtHint = dtHint;
         this.prefetchNum = prefetchNum;
         this.prefetchLength = prefetchLength;
     }
@@ -31,11 +33,11 @@ export class Fetcher {
             const first = this.frameBuffer[0];
             // 1. 如果fetch的时间范围早于frameBuffer的时间范围，则清空frameBuffer
             // 即用户操作回退，需要重新fetch
-            if (startT < first.t) {
+            if (startT < first.t - this.dtHint) {
                 this.frameBuffer = [];
             }
-            // 2. 清空frameBuffer中所有早于startT的数据
-            while (this.frameBuffer.length > 0 && this.frameBuffer[0].t < startT) {
+            // 2. 清空frameBuffer中所有早于startT - dtHint的数据
+            while (this.frameBuffer.length > 0 && this.frameBuffer[0].t < startT - this.dtHint) {
                 this.frameBuffer.shift();
             }
             // 3. 如果frameBuffer中已经包含了[start, end]的所有数据，则不需要再发请求
@@ -48,8 +50,8 @@ export class Fetcher {
             }
         }
         // 2. 发送请求
-        const prefetchLength = endT - startT;
-        const reqs = createRequests(startT, this.prefetchNum, prefetchLength);
+        const prefetchNum = Math.ceil((endT - startT) / this.prefetchLength);
+        const reqs = createRequests(startT, prefetchNum, this.prefetchLength);
         for (const req of reqs) {
             // 等待响应
             const newFrames = await req.promise;
