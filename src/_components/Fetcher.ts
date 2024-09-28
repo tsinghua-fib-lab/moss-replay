@@ -29,6 +29,7 @@ export class Fetcher {
     async fetch(startT: number, endT: number, createRequests: (t: number, prefetchNum: number, prefetchLength: number) => FrameGroup[]) {
         endT = Math.max(endT, startT + this.prefetchLength);
         // 1. 检查frameBuffer
+        let log = `Fetcher: function call fetch(${startT}, ${endT})\n`;
         if (this.frameBuffer.length > 0) {
             const first = this.frameBuffer[0];
             // 1. 如果fetch的时间范围早于frameBuffer的时间范围，则清空frameBuffer
@@ -40,7 +41,7 @@ export class Fetcher {
             while (this.frameBuffer.length > 0 && this.frameBuffer[0].t <= startT - this.dtHint) {
                 this.frameBuffer.shift();
             }
-            console.log(`Fetcher: buffer time range ${this.frameBuffer[0].t} - ${this.frameBuffer[this.frameBuffer.length - 1].t}, fetch time range ${startT} - ${endT}`);
+            log += `Fetcher: buffer time range ${this.frameBuffer[0].t} - ${this.frameBuffer[this.frameBuffer.length - 1].t}\n`;
             // 3. 如果frameBuffer中已经包含了[start, end]的所有数据，则不需要再发请求
             if (this.frameBuffer.length > 0 && this.frameBuffer[this.frameBuffer.length - 1].t + this.dtHint > endT) {
                 return;
@@ -52,7 +53,7 @@ export class Fetcher {
         }
         // 2. 发送请求
         const prefetchNum = Math.ceil((endT - startT) / this.prefetchLength);
-        console.log(`Fetcher: fetch ${startT} - ${endT}, prefetchNum ${prefetchNum}`);
+        log += `Sending requests: ${startT} - ${endT}, prefetchNum=${prefetchNum}\n`;
         const reqs = createRequests(startT, prefetchNum, this.prefetchLength);
         for (const req of reqs) {
             // 等待响应
@@ -61,9 +62,11 @@ export class Fetcher {
             for (const frame of newFrames) {
                 this.frameBuffer.push(frame);
             }
+            log += `Received ${newFrames.length} frames\n`;
         }
         // 按照时间顺序排序
         this.frameBuffer.sort((a, b) => a.t - b.t);
+        log += `After: buffer time range ${this.frameBuffer[0].t} - ${this.frameBuffer[this.frameBuffer.length - 1].t}\n`;
     }
 
     // 用于在play时获取t时刻的相关数据（当前帧或前后两帧，没找到则返回空数组）
