@@ -6,7 +6,7 @@ import { CylinderGeometry } from '@luma.gl/engine';
 import { IPlayer } from "./interface";
 
 // 原始响应
-export interface PedestrianRaw {
+export interface Pedestrian {
     id: number;
     lat: number;
     lng: number;
@@ -16,7 +16,7 @@ export interface PedestrianRaw {
 }
 
 export interface PedestrianFrame extends Frame {
-    data: PedestrianRaw[];
+    data: Pedestrian[];
 }
 
 export class PedestrianPlayer implements IPlayer {
@@ -59,7 +59,7 @@ export class PedestrianPlayer implements IPlayer {
         const f2: PedestrianFrame = res[res.length - 1];
 
         // 第2帧转为map
-        const f2Id2Raw: Map<number, PedestrianRaw> = new Map();
+        const f2Id2Raw: Map<number, Pedestrian> = new Map();
         for (const p of f2.data) {
             f2Id2Raw.set(p.id, p);
         }

@@ -11,7 +11,7 @@ import { CarFrame } from './_components/players/Car'
 import { PedestrianFrame } from './_components/players/Pedestrian'
 import { RoadStatusFrame } from './_components/players/RoadStatus'
 import { TLFrame } from './_components/players/TrafficLight'
-import { LngLat, LngLatBound, MessageHandler, SimRaw } from './_components/type'
+import { LngLat, LngLatBound, MessageHandler, Sim } from './_components/type'
 
 const IconFont = createFromIconfontCN({
     scriptUrl: "//at.alicdn.com/t/c/font_4473864_4oani4ws6sk.js",
@@ -52,7 +52,7 @@ const InputJump = ({ onJump }: {
 
 
 export const Replay = (props: {
-    sim: SimRaw | undefined, // the simulation data
+    sim: Sim | undefined, // the simulation data
     mapCenter: LngLat, // the current center of the map
     onSetMapCenter: (center: LngLat) => void, // set the center of the map
     onCarFetch: (startT: number, endT: number, bound?: LngLatBound) => Promise<CarFrame[]>,

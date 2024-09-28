@@ -6,14 +6,13 @@ import { GeoJsonLayer } from '@deck.gl/layers/typed';
 import { IPlayer } from "./interface";
 
 // 信控原始响应
-export interface RoadStatusRaw {
+export interface RoadStatus {
     id: number;
-    step: number;
     level: 0 | 1 | 2 | 3 | 4 | 5 | 6;
 }
 
 export interface RoadStatusFrame extends Frame {
-    data: RoadStatusRaw[];
+    data: RoadStatus[];
 }
 
 const ALPHA = 0.5;

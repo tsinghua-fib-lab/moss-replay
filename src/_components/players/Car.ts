@@ -6,7 +6,7 @@ import { IPlayer } from "./interface";
 import { angleInterp } from "../utils/math";
 
 // 车辆原始响应
-export interface CarRaw {
+export interface Car {
     id: number;
     lat: number;
     lng: number;
@@ -17,7 +17,7 @@ export interface CarRaw {
 }
 
 export interface CarFrame extends Frame {
-    data: CarRaw[];
+    data: Car[];
 }
 
 export class CarPlayer implements IPlayer {
@@ -68,7 +68,7 @@ export class CarPlayer implements IPlayer {
         const f2: CarFrame = res[res.length - 1];
 
         // 第2帧转为map
-        const f2Id2Raw: Map<number, CarRaw> = new Map();
+        const f2Id2Raw: Map<number, Car> = new Map();
         for (const car of f2.data) {
             f2Id2Raw.set(car.id, car);
         }

@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { Layer } from "@deck.gl/core/typed";
 import { GeoJsonLayer } from '@deck.gl/layers/typed'
 import { RoadStatusFrame, RoadStatusPlayer } from "./players/RoadStatus";
-import { LngLatBound, SimRaw } from "./type";
+import { LngLatBound, Sim } from "./type";
 import { TLFrame, TLPlayer } from "./players/TrafficLight";
 import { PedestrianFrame, PedestrianPlayer } from "./players/Pedestrian";
 import { IPlayer } from "./players/interface";
@@ -12,7 +12,7 @@ import { CarFrame, CarPlayer } from "./players/Car";
 // pickable: 是否可选中
 // interpolation: 是否插值
 const usePlayer = (
-    sim: SimRaw | undefined,
+    sim: Sim | undefined,
     onCarFetch: (startT: number, endT: number, bound?: LngLatBound) => Promise<CarFrame[]>,
     onPedestrianFetch: (startT: number, endT: number, bound?: LngLatBound) => Promise<PedestrianFrame[]>,
     onTLFetch: (startT: number, endT: number, bound?: LngLatBound) => Promise<TLFrame[]>,

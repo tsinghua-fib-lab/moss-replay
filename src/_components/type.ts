@@ -10,7 +10,7 @@ export interface LngLatBound {
     lng2: number;
 }
 
-export interface SimRaw {
+export interface Sim {
     name: string;
     start: number;
     steps: number;

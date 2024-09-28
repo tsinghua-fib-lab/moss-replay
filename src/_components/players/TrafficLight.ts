@@ -7,14 +7,13 @@ import { GeoJsonLayer } from '@deck.gl/layers/typed';
 import { IPlayer } from "./interface";
 
 // 信控原始响应
-export interface TLRaw {
+export interface TL {
     id: number;
-    step: number;
     state: 0 | 1 | 2 | 3;
 }
 
 export interface TLFrame extends Frame {
-    data: TLRaw[];
+    data: TL[];
 }
 
 const ALPHA = 0.5;
