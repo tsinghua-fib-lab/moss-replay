@@ -214,17 +214,19 @@ const usePlayer = (
 
     // 固定帧率调用play
     const loop = () => {
-        requestAnimationFrame(loop);
-
         const now = performance.now();
         const elapsed = now - then.current;
 
         if (elapsed > fpsInterval) {
             then.current = now - (elapsed % fpsInterval);
             if (playing.current) {
-                play();
+                play().then(() => {
+                    requestAnimationFrame(loop);
+                });
+                return;
             }
         }
+        requestAnimationFrame(loop);
     };
 
     const setOpenMicroLayer = async (newOpenMicroLayer: boolean) => {
