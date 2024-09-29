@@ -26,8 +26,14 @@ const usePlayer = (
     fps: number,
 ) => {
     // 控制状态
-    const [startT, setStartT] = useState<number>(0);
-    const [endT, setEndT] = useState<number>(0);
+    const startT = useRef<number>(0);
+    const setStartT = (newStartT: number) => {
+        startT.current = newStartT;
+    }
+    const endT = useRef<number>(0);
+    const setEndT = (newEndT: number) => {
+        endT.current = newEndT;
+    }
 
     const t = useRef<number>(0);
     const lastT = useRef<number>(0);
@@ -143,11 +149,11 @@ const usePlayer = (
         const dt = (nowMs - lastT.current) * speed.current / 1000;
         lastT.current = nowMs;
         t.current = t.current + dt;
-        if (t.current < startT) {
-            t.current = startT;
+        if (t.current < startT.current) {
+            t.current = startT.current;
         }
-        if (t.current > endT) {
-            t.current = endT;
+        if (t.current > endT.current) {
+            t.current = endT.current;
         }
         let players: IPlayer[] = [];
         if (openMicroLayer.current) {
@@ -159,6 +165,7 @@ const usePlayer = (
             players.push(roadStatusPlayer.current as IPlayer);
         }
         players = players.filter(p => p !== undefined);
+        console.log(`player: play at ${t.current}`);
         // 播放计算
         const playT = interpolation.current ? t.current : Math.floor(t.current);
         await Promise.all(players.map(async player => {
@@ -197,7 +204,8 @@ const usePlayer = (
         setLayers(layers);
 
         // 播放结束
-        if (t.current >= endT) {
+        console.log(`player: check end ${t.current} ? ${endT}`);
+        if (t.current >= endT.current) {
             setPlaying(false);
         }
     };
@@ -222,11 +230,11 @@ const usePlayer = (
 
     return {
         layers,
-        playing,
+        playing: playing.current,
         setPlaying,
-        startT,
+        startT: startT.current,
         setStartT,
-        endT,
+        endT: endT.current,
         setEndT,
         speed,
         setSpeed,
