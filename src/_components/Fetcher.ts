@@ -43,7 +43,11 @@ export class Fetcher {
             while (this.frameBuffer.length > 0 && this.frameBuffer[0].t <= startT) {
                 this.frameBuffer.shift();
             }
-            log += `Fetcher: buffer time range ${this.frameBuffer[0]?.t} - ${this.frameBuffer[this.frameBuffer.length - 1]?.t}\n`;
+            log += `Fetcher: buffer time range [`;
+            for (let i = 0; i < this.frameBuffer.length; i++) {
+                log += `${this.frameBuffer[i].t},`;
+            }
+            log += ']\n';
             // 3. 如果frameBuffer中已经包含了[start, end]的所有数据，则不需要再发请求
             if (this.frameBuffer.length > 0 && this.frameBuffer[this.frameBuffer.length - 1].t > endT) {
                 return;
@@ -68,7 +72,11 @@ export class Fetcher {
         // 按照时间顺序排序且去重
         this.frameBuffer.sort((a, b) => a.t - b.t);
         this.frameBuffer = this.frameBuffer.filter((frame, idx) => idx === 0 || frame.t !== this.frameBuffer[idx - 1].t);
-        log += `After: buffer time range ${this.frameBuffer[0]?.t} - ${this.frameBuffer[this.frameBuffer.length - 1]?.t}\n`;
+        log += `After: buffer time range [`;
+        for (let i = 0; i < this.frameBuffer.length; i++) {
+            log += `${this.frameBuffer[i].t},`;
+        }
+        log += ']\n';
         console.log(log);
     }
 
