@@ -43,7 +43,7 @@ const InputJump = ({ onJump }: {
                 placeholder="Latitude"
             />
         </Form.Item>
-        <Button type="primary" htmlType="submit">
+        <Button type="default" htmlType="submit">
             Fly To
         </Button>
     </Form>
