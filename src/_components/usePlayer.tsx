@@ -134,7 +134,7 @@ const usePlayer = (
                 carPlayer.current.init(),
             ]);
             setLayers([]);
-            await play();
+            await play(sim.start);
         };
         fetchSim();
 
@@ -161,12 +161,17 @@ const usePlayer = (
     }, [allLaneGeoJson]);
 
     // 播放函数，每次播放一帧，改变layers
-    const play = async () => {
+    const play = async (forceT?: number) => {
         // 时间计算
         const nowMs = performance.now();
-        const dt = (nowMs - lastT.current) * speed.current / 1000;
-        lastT.current = nowMs;
-        t.current = t.current + dt;
+        if (forceT !== undefined) {
+            lastT.current = nowMs;
+            t.current = forceT;
+        } else {
+            const dt = (nowMs - lastT.current) * speed.current / 1000;
+            lastT.current = nowMs;
+            t.current = t.current + dt;
+        }
         if (t.current < startT.current) {
             t.current = startT.current;
         }
@@ -248,6 +253,7 @@ const usePlayer = (
     const setT = async (newT: number) => {
         lastT.current = performance.now();
         t.current = newT;
+        await play(newT);
     }
 
     return {
