@@ -107,10 +107,10 @@ export const Replay = (props: {
 
     // console.log geojsons change
     useEffect(() => {
-        console.log(`aoiGeoJson changed to ${props.aoiGeoJson.length} features`)
+        // console.log(`aoiGeoJson changed to ${props.aoiGeoJson.length} features`)
     }, [props.aoiGeoJson])
     useEffect(() => {
-        console.log(`allLaneGeoJson changed to ${props.allLaneGeoJson.length} features`)
+        // console.log(`allLaneGeoJson changed to ${props.allLaneGeoJson.length} features`)
     }, [props.allLaneGeoJson])
 
     const layerButtons = (

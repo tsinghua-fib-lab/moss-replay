@@ -73,6 +73,7 @@ const usePlayer = (
     const carPlayer = useRef<CarPlayer>();
 
     // 动画循环
+    const loopStarted = useRef<boolean>(false);
     const fpsInterval = 1000 / fps;
     const then = useRef<number>(0);
 
@@ -80,8 +81,11 @@ const usePlayer = (
     const [layers, setLayers] = useState<Layer[]>([]);
 
     useEffect(() => {
-        then.current = performance.now();
-        loop();
+        if (!loopStarted.current) {
+            loopStarted.current = true;
+            then.current = performance.now();
+            loop();
+        }
     }, []);
 
     // 当name变更时，重置并获取startT和endT
@@ -165,7 +169,7 @@ const usePlayer = (
             players.push(roadStatusPlayer.current as IPlayer);
         }
         players = players.filter(p => p !== undefined);
-        console.log(`player: play at ${t.current}`);
+        // console.log(`player: play at ${t.current}`);
         // 播放计算
         const playT = interpolation.current ? t.current : Math.floor(t.current);
         const layers = (await Promise.all(players
@@ -201,7 +205,7 @@ const usePlayer = (
         setLayers(layers);
 
         // 播放结束
-        console.log(`player: check end ${t.current} ? ${endT.current}`);
+        // console.log(`player: check end ${t.current} ? ${endT.current}`);
         if (t.current >= endT.current) {
             setPlaying(false);
         }

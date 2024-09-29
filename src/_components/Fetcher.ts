@@ -33,29 +33,29 @@ export class Fetcher {
         let startT = t - this.dtHint;
         const endT = t + this.prefetchLength;
         // 1. 检查frameBuffer
-        let log = `Fetcher ${this.name}: function call fetch(${t}, ${endT})\n`;
+        // let log = `Fetcher ${this.name}: function call fetch(${t}, ${endT})\n`;
         do {
             if (this.frameBuffer.length > 0) {
                 const first = this.frameBuffer[0];
                 // 1. 如果fetch的时间范围早于frameBuffer的时间范围，则清空frameBuffer
                 // 即用户操作回退，需要重新fetch
                 if (startT < first.t - this.dtHint) {
-                    log += `Clear buffer\n`;
+                    // log += `Clear buffer\n`;
                     this.frameBuffer = [];
                 }
                 // 2. 清空frameBuffer中所有早于startT - dtHint的数据
                 while (this.frameBuffer.length > 0 && this.frameBuffer[0].t <= startT) {
-                    log += `Remove ${this.frameBuffer[0].t}\n`;
+                    // log += `Remove ${this.frameBuffer[0].t}\n`;
                     this.frameBuffer.shift();
                 }
-                log += `Fetcher: buffer time range [`;
-                for (let i = 0; i < this.frameBuffer.length; i++) {
-                    log += `${this.frameBuffer[i].t},`;
-                }
-                log += ']\n';
+                // log += `Fetcher: buffer time range [`;
+                // for (let i = 0; i < this.frameBuffer.length; i++) {
+                //     log += `${this.frameBuffer[i].t},`;
+                // }
+                // log += ']\n';
                 // 3. 如果frameBuffer中已经包含了[start, end]的所有数据，则不需要再发请求
                 if (this.frameBuffer.length > 0 && this.frameBuffer[this.frameBuffer.length - 1].t > endT) {
-                    log += `No need to fetch\n`;
+                    // log += `No need to fetch\n`;
                     break;
                 }
                 // 4. 否则请求获取剩下的数据
@@ -64,54 +64,52 @@ export class Fetcher {
                 }
             }
             // 2. 发送请求
-            log += `Send request from ${startT} to ${endT}\n`;
+            // log += `Send request from ${startT} to ${endT}\n`;
             const reqs = createRequests(startT, Math.ceil((endT - startT) / this.prefetchLength), this.prefetchLength);
             for (const req of reqs) {
                 // 等待响应
                 const newFrames = await req.promise;
                 // 将新数据加入frameBuffer
-                for (const frame of newFrames) {
-                    this.frameBuffer.push(frame);
-                }
-                log += `Received ${newFrames.length} frames\n`;
+                this.frameBuffer.push(...newFrames);
+                // log += `Received ${newFrames.length} frames\n`;
             }
-            log += `After push: buffer time range [`;
-            for (let i = 0; i < this.frameBuffer.length; i++) {
-                log += `${this.frameBuffer[i].t},`;
-            }
-            log += ']\n';
+            // log += `After push: buffer time range [`;
+            // for (let i = 0; i < this.frameBuffer.length; i++) {
+            //     log += `${this.frameBuffer[i].t},`;
+            // }
+            // log += ']\n';
             // 按照时间顺序排序且去重
             this.frameBuffer.sort((a, b) => a.t - b.t);
-            log += `After sort: buffer time range [`;
-            for (let i = 0; i < this.frameBuffer.length; i++) {
-                log += `${this.frameBuffer[i].t},`;
-            }
+            // log += `After sort: buffer time range [`;
+            // for (let i = 0; i < this.frameBuffer.length; i++) {
+            //     log += `${this.frameBuffer[i].t},`;
+            // }
             this.frameBuffer = this.frameBuffer.filter((frame, idx) => idx === 0 || frame.t !== this.frameBuffer[idx - 1].t);
-            log += `After unique: buffer time range [`;
-            for (let i = 0; i < this.frameBuffer.length; i++) {
-                log += `${this.frameBuffer[i].t},`;
-            }
-            log += ']\n';
+            // log += `After unique: buffer time range [`;
+            // for (let i = 0; i < this.frameBuffer.length; i++) {
+            //     log += `${this.frameBuffer[i].t},`;
+            // }
+            // log += ']\n';
         } while (false);
         
         // 3. 获取在play时需要的数据（当前帧或前后两帧，没找到则返回空数组）
-        log += `Fetcher ${this.name}: function call getWhenPlay(${t})\n`;
-        for (let i = 0; i < this.frameBuffer.length; i++) {
-            log += `${this.frameBuffer[i].t},`;
-        }
-        log += '\n';
+        // log += `Fetcher ${this.name}: function call getWhenPlay(${t})\n`;
+        // for (let i = 0; i < this.frameBuffer.length; i++) {
+        //     log += `${this.frameBuffer[i].t},`;
+        // }
+        // log += '\n';
         if (this.frameBuffer.length === 0) {
-            log += `No data\n`;
-            console.log(log);
+            // log += `No data\n`;
+            // console.log(log);
             return [];
         }
         if (t < this.frameBuffer[0].t) {
-            log += `No data t<firstT\n`;
-            console.log(log);
+            // log += `No data t<firstT\n`;
+            // console.log(log);
             return [];
         }
         if (t > this.frameBuffer[this.frameBuffer.length - 1].t) {
-            log += `No data t>lastT\n`;
+            // log += `No data t>lastT\n`;
             return [];
         }
         let i = 0; // 标识frameBuffer中第一个t大于等于t的元素
@@ -128,7 +126,7 @@ export class Fetcher {
             res.push(this.frameBuffer[i - 1]);
             res.push(this.frameBuffer[i]);
         }
-        console.log(log);
+        // console.log(log);
         return res;
     }
 }
