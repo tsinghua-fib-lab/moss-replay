@@ -35,7 +35,7 @@ export class CarPlayer implements IPlayer {
         this.onFetch = onFetch;
         this.modelPaths = modelPaths;
         this.defaultModelPath = defaultModelPath;
-        this.fetcher = new Fetcher(dtHint ?? 1, 3);
+        this.fetcher = new Fetcher("car", dtHint ?? 1, 3);
     }
 
     async init() {

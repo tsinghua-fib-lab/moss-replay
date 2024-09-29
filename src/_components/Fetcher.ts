@@ -13,12 +13,14 @@ export interface FrameGroup {
 }
 
 export class Fetcher {
+    name: string;
     dtHint: number; // 数据帧的时间间隔
     prefetchLength: number; // 预取的未来数据t长度
 
     frameBuffer: Frame[] = []; // 按时间顺序存储最近几帧的连续数据（含预取数据），时间小于等于当前时间的数据将被自动清除
 
-    constructor(dtHint: number, prefetchLength: number) {
+    constructor(name: string, dtHint: number, prefetchLength: number) {
+        this.name = name;
         this.dtHint = dtHint;
         this.prefetchLength = prefetchLength;
     }
@@ -31,7 +33,7 @@ export class Fetcher {
         let startT = t - this.dtHint;
         const endT = t + this.prefetchLength;
         // 1. 检查frameBuffer
-        let log = `Fetcher: function call fetch(${t}, ${endT})\n`;
+        let log = `Fetcher ${this.name}: function call fetch(${t}, ${endT})\n`;
         if (this.frameBuffer.length > 0) {
             const first = this.frameBuffer[0];
             // 1. 如果fetch的时间范围早于frameBuffer的时间范围，则清空frameBuffer
@@ -50,6 +52,7 @@ export class Fetcher {
             log += ']\n';
             // 3. 如果frameBuffer中已经包含了[start, end]的所有数据，则不需要再发请求
             if (this.frameBuffer.length > 0 && this.frameBuffer[this.frameBuffer.length - 1].t > endT) {
+                console.log(log);
                 return;
             }
             // 4. 否则请求获取剩下的数据
@@ -82,6 +85,12 @@ export class Fetcher {
 
     // 用于在play时获取t时刻的相关数据（当前帧或前后两帧，没找到则返回空数组）
     getWhenPlay(t: number) {
+        let log = `Fetcher ${this.name}: function call getWhenPlay(${t})\n`;
+        for (let i = 0; i < this.frameBuffer.length; i++) {
+            log += `${this.frameBuffer[i].t},`;
+        }
+        log += '\n';
+        console.log(log);
         if (this.frameBuffer.length === 0) {
             return [];
         }
