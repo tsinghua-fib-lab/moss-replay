@@ -23,27 +23,50 @@ const usePlayer = (
     allLaneGeoJson: GeoJSON.Feature[],
     carModelPaths: { [model: string]: string },
     defaultCarModelPath: string,
-    openMicroLayer: boolean,
-    openMacroLayer: boolean,
-    openAoiLayer: boolean,
-    openAllLaneLayer: boolean,
-    interpolation: boolean,
-    pickable: boolean,
+    fps: number,
 ) => {
     // 控制状态
-    const [playing, setPlaying] = useState<boolean>(false);
     const [startT, setStartT] = useState<number>(0);
     const [endT, setEndT] = useState<number>(0);
-    const t = useRef<number>(0);
 
+    const t = useRef<number>(0);
+    const lastT = useRef<number>(0);
     const speed = useRef<number>(1);
     const setSpeed = (newSpeed: number) => {
         speed.current = newSpeed;
     }
-    const lastT = useRef<number>(0);
+    const playing = useRef<boolean>(false);
+    const setPlaying = (newPlaying: boolean) => {
+        if (newPlaying) {
+            lastT.current = performance.now();
+        }
+        playing.current = newPlaying;
+    }
+    const openMicroLayer = useRef<boolean>(true);
+    const setOpenMicroLayer = (newOpenMicroLayer: boolean) => {
+        openMicroLayer.current = newOpenMicroLayer;
+    }
+    const openMacroLayer = useRef<boolean>(true);
+    const setOpenMacroLayer = (newOpenMacroLayer: boolean) => {
+        openMacroLayer.current = newOpenMacroLayer;
+    }
+    const openAoiLayer = useRef<boolean>(false);
+    const setOpenAoiLayer = (newOpenAoiLayer: boolean) => {
+        openAoiLayer.current = newOpenAoiLayer;
+    }
+    const openAllLaneLayer = useRef<boolean>(false);
+    const setOpenAllLaneLayer = (newOpenAllLaneLayer: boolean) => {
+        openAllLaneLayer.current = newOpenAllLaneLayer;
+    }
+    const interpolation = useRef<boolean>(true);
+    const setInterpolation = (newPickable: boolean) => {
+        interpolation.current = newPickable;
+    }
+    const pickable = useRef<boolean>(false);
+    const setPickable = (newPickable: boolean) => {
+        pickable.current = newPickable;
+    }
 
-    // 动画帧句柄
-    const aniHandler = useRef<number | undefined>(undefined);
     // Player对象
     const bound = useRef<LngLatBound>();
     const setBound = (newBound: LngLatBound) => {
@@ -54,8 +77,17 @@ const usePlayer = (
     const pedestrianPlayer = useRef<PedestrianPlayer>();
     const carPlayer = useRef<CarPlayer>();
 
+    // 动画循环
+    const fpsInterval = 1000 / fps;
+    const then = useRef<number>(0);
+
     // 动画内容
     const [layers, setLayers] = useState<Layer[]>([]);
+
+    useEffect(() => {
+        then.current = performance.now();
+        loop();
+    }, []);
 
     // 当name变更时，重置并获取startT和endT
     useEffect(() => {
@@ -84,7 +116,6 @@ const usePlayer = (
                 carPlayer.current.init(),
             ]);
             setLayers([]);
-            await play(sim.start);
         };
         fetchSim();
 
@@ -103,20 +134,15 @@ const usePlayer = (
     }, [junctionLaneGeoJson]);
 
     // 播放函数，每次播放一帧，改变layers
-    const play = async (forceT?: number) => {
-        if (!playing) {
+    const play = async () => {
+        if (!playing.current) {
             return;
         }
         // 时间计算
         const nowMs = performance.now();
-        if (forceT !== undefined) {
-            lastT.current = nowMs;
-            t.current = forceT;
-        } else {
-            const dt = (nowMs - lastT.current) * speed.current / 1000;
-            lastT.current = nowMs;
-            t.current = t.current + dt;
-        }
+        const dt = (nowMs - lastT.current) * speed.current / 1000;
+        lastT.current = nowMs;
+        t.current = t.current + dt;
         if (t.current < startT) {
             t.current = startT;
         }
@@ -124,22 +150,22 @@ const usePlayer = (
             t.current = endT;
         }
         let players: IPlayer[] = [];
-        if (openMicroLayer) {
+        if (openMicroLayer.current) {
             players.push(tlPlayer.current as IPlayer);
             players.push(pedestrianPlayer.current as IPlayer);
             players.push(carPlayer.current as IPlayer);
         }
-        if (openMacroLayer) {
+        if (openMacroLayer.current) {
             players.push(roadStatusPlayer.current as IPlayer);
         }
         players = players.filter(p => p !== undefined);
         // 播放计算
-        const playT = interpolation ? t.current : Math.floor(t.current);
+        const playT = interpolation.current ? t.current : Math.floor(t.current);
         await Promise.all(players.map(async player => {
             await player.ready(playT, bound.current);
         }));
         const layers = players
-            .map(player => player.play(playT, pickable))
+            .map(player => player.play(playT, pickable.current))
             .flat();
         if (openAoiLayer) {
             layers.push(new GeoJsonLayer({
@@ -152,7 +178,7 @@ const usePlayer = (
                 lineWidthMinPixels: 1,
                 getLineColor: [230, 199, 168, 128],
                 getFillColor: [230, 199, 168, 64],
-                pickable: pickable,
+                pickable: pickable.current,
             }))
         }
         if (openAllLaneLayer) {
@@ -165,7 +191,7 @@ const usePlayer = (
                 lineWidthScale: 1,
                 lineWidthMinPixels: 1,
                 getLineColor: (f: any) => f.properties.type === 1 ? [0, 153, 204, 64] : [0, 153, 255, 32],
-                pickable: pickable,
+                pickable: pickable.current,
             }))
         }
         setLayers(layers);
@@ -173,59 +199,25 @@ const usePlayer = (
         // 播放结束
         if (t.current >= endT) {
             setPlaying(false);
-            if (aniHandler.current) {
-                cancelAnimationFrame(aniHandler.current);
-            }
-            aniHandler.current = undefined;
-            return;
-        }
-
-        if (forceT === undefined) {
-            // 循环播放
-            aniHandler.current = requestAnimationFrame(() => {
-                play();
-            });
         }
     };
 
-    // 当playing变更时，开始或停止播放
-    useEffect(() => {
-        if (playing) {
-            lastT.current = performance.now();
-            play();
-        } else {
-            if (aniHandler.current) {
-                cancelAnimationFrame(aniHandler.current);
-            }
-            aniHandler.current = undefined;
-        }
-        return () => {
-            if (aniHandler.current) {
-                cancelAnimationFrame(aniHandler.current);
-            }
-            aniHandler.current = undefined;
-        }
-    }, [playing]);
+    // 固定帧率调用play
+    const loop = () => {
+        requestAnimationFrame(loop);
 
-    // 当控制开关变化时，启停播放
-    useEffect(() => {
-        if (playing) {
-            if (aniHandler.current) {
-                cancelAnimationFrame(aniHandler.current);
-            }
-            aniHandler.current = undefined;
+        const now = performance.now();
+        const elapsed = now - then.current;
+
+        if (elapsed > fpsInterval) {
+            then.current = now - (elapsed % fpsInterval);
             play();
-        } else {
-            play(t.current);
         }
-    }, [openMicroLayer, openMacroLayer, openAoiLayer, openAllLaneLayer, interpolation, pickable]);
+    };
 
     const setT = async (newT: number) => {
-        if (playing) {
-            t.current = newT;
-        } else {
-            await play(newT);
-        }
+        lastT.current = performance.now();
+        t.current = newT;
     }
 
     return {
@@ -241,6 +233,12 @@ const usePlayer = (
         t: t.current,
         setT,
         setBound,
+        openMicroLayer: openMicroLayer.current, setOpenMicroLayer,
+        openMacroLayer: openMacroLayer.current, setOpenMacroLayer,
+        openAoiLayer: openAoiLayer.current, setOpenAoiLayer,
+        openAllLaneLayer: openAllLaneLayer.current, setOpenAllLaneLayer,
+        interpolation: interpolation.current, setInterpolation,
+        pickable: pickable.current, setPickable,
     }
 }
 

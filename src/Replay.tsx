@@ -75,13 +75,7 @@ export const Replay = (props: {
     const [mouse, setMouse] = useState<LngLat>({ lng: 0, lat: 0 })
 
     // user input by GUI
-    const [openMicroLayer, setOpenMicroLayer] = useState(true)
-    const [openMacroLayer, setOpenMacroLayer] = useState(true)
-    const [interpolation, setInterpolation] = useState(true)
-    const [pickable, setPickable] = useState(false)
     const [sliderValue, setSliderValue] = useState<number | undefined>()
-    const [openAoiLayer, setOpenAoiLayer] = useState(false)
-    const [openMoreLaneLayer, setOpenMoreLaneLayer] = useState(false)
 
     const {
         layers,
@@ -90,6 +84,12 @@ export const Replay = (props: {
         playing, setPlaying,
         setSpeed,
         setBound,
+        openMicroLayer, setOpenMicroLayer,
+        openMacroLayer, setOpenMacroLayer,
+        openAoiLayer, setOpenAoiLayer,
+        openAllLaneLayer, setOpenAllLaneLayer,
+        interpolation, setInterpolation,
+        pickable, setPickable,
     } = usePlayer(
         props.sim,
         props.onCarFetch,
@@ -102,9 +102,7 @@ export const Replay = (props: {
         props.allLaneGeoJson,
         props.carModelPaths,
         props.defaultCarModelPath,
-        openMicroLayer, openMacroLayer,
-        openAoiLayer, openMoreLaneLayer,
-        interpolation, pickable,
+        20,
     )
 
     const layerButtons = (
@@ -127,34 +125,34 @@ export const Replay = (props: {
                 <Button
                     type={openMicroLayer ? "link" : "text"}
                     icon={<IconFont type='icon-car-fill' />}
-                    onClick={() => setOpenMicroLayer((old) => !old)}
+                    onClick={() => setOpenMicroLayer(!openMicroLayer)}
                 />
             </Tooltip>
             <Tooltip placement="bottom" title="Road Status">
                 <Button
                     type={openMacroLayer ? "link" : "text"}
                     icon={<IconFont type='icon-gaosu' />}
-                    onClick={() => setOpenMacroLayer((old) => !old)}
+                    onClick={() => setOpenMacroLayer(!openMacroLayer)}
                 />
             </Tooltip>
             <Tooltip placement="bottom" title="AOI">
                 <Button
                     type={openAoiLayer ? "link" : "text"}
                     icon={<IconFont type='icon-community-line' />}
-                    onClick={() => setOpenAoiLayer((old) => !old)}
+                    onClick={() => setOpenAoiLayer(!openAoiLayer)}
                 />
             </Tooltip>
             <Tooltip placement="bottom" title="More Lane Information">
                 <Button
-                    type={openMoreLaneLayer ? "link" : "text"}
+                    type={openAllLaneLayer ? "link" : "text"}
                     icon={<IconFont type='icon-daolu' />}
-                    onClick={() => setOpenMoreLaneLayer((old) => {
-                        const next = !old
+                    onClick={() => {
+                        const next = !openAllLaneLayer;
                         if (next) {
                             props.message.warning("Enabling this option may affect display performance, please note!", 1)
                         }
-                        return next
-                    })}
+                        setOpenAllLaneLayer(next);
+                    }}
                 />
             </Tooltip>
         </Space>
