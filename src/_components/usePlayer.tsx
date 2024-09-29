@@ -26,20 +26,23 @@ const usePlayer = (
     fps: number,
 ) => {
     // 控制状态
+    const [_forRender, _setForRender] = useState<number>(0);
     const startT = useRef<number>(0);
     const setStartT = (newStartT: number) => {
         startT.current = newStartT;
+        _setForRender(_forRender + 1);
     }
     const endT = useRef<number>(0);
     const setEndT = (newEndT: number) => {
         endT.current = newEndT;
+        _setForRender(_forRender + 1);
     }
-
     const t = useRef<number>(0);
     const lastT = useRef<number>(0);
     const speed = useRef<number>(1);
     const setSpeed = (newSpeed: number) => {
         speed.current = newSpeed;
+        _setForRender(_forRender + 1);
     }
     const playing = useRef<boolean>(false);
     const setPlaying = (newPlaying: boolean) => {
@@ -47,30 +50,37 @@ const usePlayer = (
             lastT.current = performance.now();
         }
         playing.current = newPlaying;
+        _setForRender(_forRender + 1);
     }
     const openMicroLayer = useRef<boolean>(true);
     const setOpenMicroLayer = (newOpenMicroLayer: boolean) => {
         openMicroLayer.current = newOpenMicroLayer;
+        _setForRender(_forRender + 1);
     }
     const openMacroLayer = useRef<boolean>(true);
     const setOpenMacroLayer = (newOpenMacroLayer: boolean) => {
         openMacroLayer.current = newOpenMacroLayer;
+        _setForRender(_forRender + 1);
     }
     const openAoiLayer = useRef<boolean>(false);
     const setOpenAoiLayer = (newOpenAoiLayer: boolean) => {
         openAoiLayer.current = newOpenAoiLayer;
+        _setForRender(_forRender + 1);
     }
     const openAllLaneLayer = useRef<boolean>(false);
     const setOpenAllLaneLayer = (newOpenAllLaneLayer: boolean) => {
         openAllLaneLayer.current = newOpenAllLaneLayer;
+        _setForRender(_forRender + 1);
     }
     const interpolation = useRef<boolean>(true);
     const setInterpolation = (newPickable: boolean) => {
         interpolation.current = newPickable;
+        _setForRender(_forRender + 1);
     }
     const pickable = useRef<boolean>(false);
     const setPickable = (newPickable: boolean) => {
         pickable.current = newPickable;
+        _setForRender(_forRender + 1);
     }
 
     // Player对象
