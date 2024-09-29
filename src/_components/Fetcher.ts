@@ -72,10 +72,19 @@ export class Fetcher {
             }
             log += `Received ${newFrames.length} frames\n`;
         }
+        log += `After push: buffer time range [`;
+        for (let i = 0; i < this.frameBuffer.length; i++) {
+            log += `${this.frameBuffer[i].t},`;
+        }
+        log += ']\n';
         // 按照时间顺序排序且去重
         this.frameBuffer.sort((a, b) => a.t - b.t);
+        log += `After sort: buffer time range [`;
+        for (let i = 0; i < this.frameBuffer.length; i++) {
+            log += `${this.frameBuffer[i].t},`;
+        }
         this.frameBuffer = this.frameBuffer.filter((frame, idx) => idx === 0 || frame.t !== this.frameBuffer[idx - 1].t);
-        log += `After: buffer time range [`;
+        log += `After unique: buffer time range [`;
         for (let i = 0; i < this.frameBuffer.length; i++) {
             log += `${this.frameBuffer[i].t},`;
         }
