@@ -48,14 +48,10 @@ export class PedestrianPlayer implements IPlayer {
         return reqs;
     }
 
-    async ready(t: number, bound: LngLatBound): Promise<void> {
-        await this.fetcher.fetch(t, (t: number, prefetchNum: number, prefetchLength: number) => {
+    async play(t: number, interpolation: boolean, pickable: boolean, bound?: LngLatBound): Promise<Layer[]> {
+        const res = await this.fetcher.fetch(t, (t: number, prefetchNum: number, prefetchLength: number) => {
             return this.createRequests(t, prefetchNum, prefetchLength, bound);
-        });
-    }
-
-    play(t: number, pickable: boolean): Layer[] {
-        const res = this.fetcher.getWhenPlay(t) as PedestrianFrame[];
+        }) as PedestrianFrame[];
         if (res.length === 0) {
             console.log("PedestrianPlayer: no data");
             return [];
@@ -70,7 +66,7 @@ export class PedestrianPlayer implements IPlayer {
             f2Id2Raw.set(p.id, p);
         }
         // 计算插值比例
-        const ratio = f2.t > f1.t ? (t - f1.t) / (f2.t - f1.t) : 0;
+        const ratio = (f2.t > f1.t && interpolation) ? (t - f1.t) / (f2.t - f1.t) : 0;
 
         const data = [];
         // 计算当前帧要呈现的所有人的位置

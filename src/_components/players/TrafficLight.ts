@@ -60,18 +60,14 @@ export class TLPlayer implements IPlayer {
         return reqs;
     }
 
-    async ready(t: number, bound: LngLatBound): Promise<void> {
-        await this.fetcher.fetch(t, (timing: number, prefetchNum: number, prefetchLength: number) => {
-            return this.createRequests(timing, prefetchNum, prefetchLength, bound);
-        });
-    }
-
-    play(t: number, pickable: boolean): Layer[] {
+    async play(t: number, _interpolation: boolean, pickable: boolean, bound?: LngLatBound): Promise<Layer[]> {
         if (this.geoJsonData === undefined) {
             return [];
         }
         // 格式转换并绘制路网
-        const frames = this.fetcher.getWhenPlay(t) as TLFrame[];
+        const frames = await this.fetcher.fetch(t, (timing: number, prefetchNum: number, prefetchLength: number) => {
+            return this.createRequests(timing, prefetchNum, prefetchLength, bound);
+        }) as TLFrame[];
         if (frames.length === 0) {
             console.log("TLPlayer: no data");
             return [];

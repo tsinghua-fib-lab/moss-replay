@@ -165,17 +165,13 @@ const usePlayer = (
             players.push(roadStatusPlayer.current as IPlayer);
         }
         players = players.filter(p => p !== undefined);
-        console.log(`player: play at ${t.current}, interpolation=${interpolation.current}, pickable=${pickable.current}, openMicroLayer=${openMicroLayer.current}, openMacroLayer=${openMacroLayer.current}, openAoiLayer=${openAoiLayer.current}, openAllLaneLayer=${openAllLaneLayer.current}`);
+        console.log(`player: play at ${t.current}`);
         // 播放计算
         const playT = interpolation.current ? t.current : Math.floor(t.current);
-        await Promise.all(players.map(async player => {
-            await player.ready(playT, bound.current);
-        }));
-        const layers = players
-            .map(player => player.play(playT, pickable.current))
-            .flat();
+        const layers = (await Promise.all(players
+            .map(player => player.play(playT, interpolation.current, pickable.current, bound.current))
+        )).flat();
         if (openAoiLayer.current) {
-            console.log(`player: add aoi layer, geojson: ${aoiGeoJsonRef.current.length}`);
             layers.push(new GeoJsonLayer({
                 id: 'aoi',
                 data: aoiGeoJsonRef.current,
@@ -190,7 +186,6 @@ const usePlayer = (
             }))
         }
         if (openAllLaneLayer.current) {
-            console.log(`player: add all lane layer, geojson: ${allLaneGeoJsonRef.current.length}`);
             layers.push(new GeoJsonLayer({
                 id: 'more-lane',
                 data: allLaneGeoJsonRef.current,

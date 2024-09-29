@@ -39,10 +39,12 @@ export class Fetcher {
             // 1. 如果fetch的时间范围早于frameBuffer的时间范围，则清空frameBuffer
             // 即用户操作回退，需要重新fetch
             if (startT < first.t - this.dtHint) {
+                log += `Clear buffer\n`;
                 this.frameBuffer = [];
             }
             // 2. 清空frameBuffer中所有早于startT - dtHint的数据
             while (this.frameBuffer.length > 0 && this.frameBuffer[0].t <= startT) {
+                log += `Remove ${this.frameBuffer[0].t}\n`;
                 this.frameBuffer.shift();
             }
             log += `Fetcher: buffer time range [`;
@@ -52,6 +54,7 @@ export class Fetcher {
             log += ']\n';
             // 3. 如果frameBuffer中已经包含了[start, end]的所有数据，则不需要再发请求
             if (this.frameBuffer.length > 0 && this.frameBuffer[this.frameBuffer.length - 1].t > endT) {
+                log += `No need to fetch\n`;
                 console.log(log);
                 return;
             }
@@ -89,24 +92,25 @@ export class Fetcher {
             log += `${this.frameBuffer[i].t},`;
         }
         log += ']\n';
-        console.log(log);
-    }
-
-    // 用于在play时获取t时刻的相关数据（当前帧或前后两帧，没找到则返回空数组）
-    getWhenPlay(t: number) {
-        let log = `Fetcher ${this.name}: function call getWhenPlay(${t})\n`;
+        
+        // 3. 获取在paly时需要的数据（当前帧或前后两帧，没找到则返回空数组）
+        log += `Fetcher ${this.name}: function call getWhenPlay(${t})\n`;
         for (let i = 0; i < this.frameBuffer.length; i++) {
             log += `${this.frameBuffer[i].t},`;
         }
         log += '\n';
-        console.log(log);
         if (this.frameBuffer.length === 0) {
+            log += `No data\n`;
+            console.log(log);
             return [];
         }
         if (t < this.frameBuffer[0].t) {
+            log += `No data t<firstT\n`;
+            console.log(log);
             return [];
         }
         if (t > this.frameBuffer[this.frameBuffer.length - 1].t) {
+            log += `No data t>lastT\n`;
             return [];
         }
         let i = 0; // 标识frameBuffer中第一个t大于等于t的元素
@@ -123,6 +127,7 @@ export class Fetcher {
             res.push(this.frameBuffer[i - 1]);
             res.push(this.frameBuffer[i]);
         }
+        console.log(log);
         return res;
     }
 }
