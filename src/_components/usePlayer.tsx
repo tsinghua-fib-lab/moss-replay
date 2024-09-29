@@ -174,7 +174,7 @@ const usePlayer = (
         const layers = players
             .map(player => player.play(playT, pickable.current))
             .flat();
-        if (openAoiLayer) {
+        if (openAoiLayer.current) {
             layers.push(new GeoJsonLayer({
                 id: 'aoi',
                 data: aoiGeoJson,
@@ -188,7 +188,7 @@ const usePlayer = (
                 pickable: pickable.current,
             }))
         }
-        if (openAllLaneLayer) {
+        if (openAllLaneLayer.current) {
             layers.push(new GeoJsonLayer({
                 id: 'more-lane',
                 data: allLaneGeoJson,

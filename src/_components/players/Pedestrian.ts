@@ -57,10 +57,12 @@ export class PedestrianPlayer implements IPlayer {
     play(t: number, pickable: boolean): Layer[] {
         const res = this.fetcher.getWhenPlay(t) as PedestrianFrame[];
         if (res.length === 0) {
+            console.log("PedestrianPlayer: no data");
             return [];
         }
         const f1: PedestrianFrame = res[0];
         const f2: PedestrianFrame = res[res.length - 1];
+        console.log(`PedestrianPlayer: play at ${t}, f1.t=${f1.t}, f2.t=${f2.t}`);
 
         // 第2帧转为map
         const f2Id2Raw: Map<number, Pedestrian> = new Map();

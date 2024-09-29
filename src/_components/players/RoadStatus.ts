@@ -75,9 +75,12 @@ export class RoadStatusPlayer implements IPlayer {
         // 格式转换并绘制路网
         const frames = this.fetcher.getWhenPlay(t) as RoadStatusFrame[];
         if (frames.length === 0) {
+            console.log("RoadStatusPlayer: no data");
             return [];
         }
         const res = frames[0].data;
+        console.log(`RoadStatusPlayer: play at ${t}, f1.t=${frames[0].t}`);
+
         const id2Color = new Map<number, Color>();
         for (const road of res) {
             id2Color.set(road.id, LEVEL_COLORS[road.level]);

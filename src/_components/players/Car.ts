@@ -64,10 +64,12 @@ export class CarPlayer implements IPlayer {
     play(t: number, pickable: boolean): Layer[] {
         const res = this.fetcher.getWhenPlay(t) as CarFrame[];
         if (res.length === 0) {
+            console.log("CarPlayer: no data");
             return [];
         }
         const f1: CarFrame = res[0];
         const f2: CarFrame = res[res.length - 1];
+        console.log(`CarPlayer: play at ${t}, f1.t=${f1.t}, f2.t=${f2.t}`);
 
         // 第2帧转为map
         const f2Id2Raw: Map<number, Car> = new Map();

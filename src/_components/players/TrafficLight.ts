@@ -73,9 +73,12 @@ export class TLPlayer implements IPlayer {
         // 格式转换并绘制路网
         const frames = this.fetcher.getWhenPlay(t) as TLFrame[];
         if (frames.length === 0) {
+            console.log("TLPlayer: no data");
             return [];
         }
         const res = frames[0].data;
+        console.log(`TLPlayer: play at ${t}, f1.t=${frames[0].t}`);
+
         const id2Color = new Map<number, Color>();
         for (const tl of res) {
             id2Color.set(tl.id, STATE_COLORS[tl.state]);
