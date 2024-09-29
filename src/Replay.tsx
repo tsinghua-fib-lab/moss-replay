@@ -11,7 +11,7 @@ import { CarFrame } from './_components/players/Car'
 import { PedestrianFrame } from './_components/players/Pedestrian'
 import { RoadStatusFrame } from './_components/players/RoadStatus'
 import { TLFrame } from './_components/players/TrafficLight'
-import { LngLat, LngLatBound, MessageHandler, Sim } from './_components/type'
+import { LngLat, LngLatBound, LngLatZoom, MessageHandler, Sim } from './_components/type'
 
 const IconFont = createFromIconfontCN({
     scriptUrl: "//at.alicdn.com/t/c/font_4473864_4oani4ws6sk.js",
@@ -53,7 +53,7 @@ const InputJump = ({ onJump }: {
 
 export const Replay = (props: {
     sim: Sim | undefined, // the simulation data
-    mapCenter: LngLat, // the current center of the map
+    mapCenter: LngLatZoom, // the current center of the map
     onSetMapCenter: (center: LngLat) => void, // set the center of the map
     onCarFetch: (startT: number, endT: number, bound?: LngLatBound) => Promise<CarFrame[]>,
     onPedestrianFetch: (startT: number, endT: number, bound?: LngLatBound) => Promise<PedestrianFrame[]>,
@@ -69,6 +69,7 @@ export const Replay = (props: {
     message: MessageHandler,
     deckHeight?: string | number, // deck高度
     extraHeader?: React.ReactNode, // 额外的头部
+    fps?: number, // 帧率（不一定准确）
 }) => {
     // internal state
     const [hovering, setHovering] = useState(false)
@@ -102,7 +103,7 @@ export const Replay = (props: {
         props.allLaneGeoJson,
         props.carModelPaths,
         props.defaultCarModelPath,
-        20,
+        props.fps ?? 30,
     )
 
     // console.log geojsons change
@@ -204,7 +205,7 @@ export const Replay = (props: {
                                 initialViewState={{
                                     longitude: props.mapCenter.lng,
                                     latitude: props.mapCenter.lat,
-                                    zoom: 10.5,
+                                    zoom: props.mapCenter.zoom,
                                     pitch: 0,
                                     bearing: 0,
                                     transitionDuration: 2000,

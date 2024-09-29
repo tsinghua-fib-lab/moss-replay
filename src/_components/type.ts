@@ -3,6 +3,12 @@ export interface LngLat {
     lat: number
 }
 
+export interface LngLatZoom {
+    lng: number
+    lat: number
+    zoom: number
+}
+
 export interface LngLatBound {
     lat1: number;
     lat2: number;
