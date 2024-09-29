@@ -53,35 +53,12 @@ const usePlayer = (
         _setForRender(_forRender + 1);
     }
     const openMicroLayer = useRef<boolean>(true);
-    const setOpenMicroLayer = (newOpenMicroLayer: boolean) => {
-        openMicroLayer.current = newOpenMicroLayer;
-        _setForRender(_forRender + 1);
-    }
     const openMacroLayer = useRef<boolean>(true);
-    const setOpenMacroLayer = (newOpenMacroLayer: boolean) => {
-        openMacroLayer.current = newOpenMacroLayer;
-        _setForRender(_forRender + 1);
-    }
     const openAoiLayer = useRef<boolean>(false);
-    const setOpenAoiLayer = (newOpenAoiLayer: boolean) => {
-        openAoiLayer.current = newOpenAoiLayer;
-        _setForRender(_forRender + 1);
-    }
     const openAllLaneLayer = useRef<boolean>(false);
-    const setOpenAllLaneLayer = (newOpenAllLaneLayer: boolean) => {
-        openAllLaneLayer.current = newOpenAllLaneLayer;
-        _setForRender(_forRender + 1);
-    }
     const interpolation = useRef<boolean>(true);
-    const setInterpolation = (newPickable: boolean) => {
-        interpolation.current = newPickable;
-        _setForRender(_forRender + 1);
-    }
     const pickable = useRef<boolean>(false);
-    const setPickable = (newPickable: boolean) => {
-        pickable.current = newPickable;
-        _setForRender(_forRender + 1);
-    }
+
     const aoiGeoJsonRef = useRef<GeoJSON.Feature[]>([]);
     const allLaneGeoJsonRef = useRef<GeoJSON.Feature[]>([]);
 
@@ -249,6 +226,37 @@ const usePlayer = (
             }
         }
     };
+
+    const setOpenMicroLayer = async (newOpenMicroLayer: boolean) => {
+        openMicroLayer.current = newOpenMicroLayer;
+        _setForRender(_forRender + 1);
+        await play(t.current);
+    }
+    const setOpenMacroLayer = async (newOpenMacroLayer: boolean) => {
+        openMacroLayer.current = newOpenMacroLayer;
+        _setForRender(_forRender + 1);
+        await play(t.current);
+    }
+    const setOpenAoiLayer = async (newOpenAoiLayer: boolean) => {
+        openAoiLayer.current = newOpenAoiLayer;
+        _setForRender(_forRender + 1);
+        await play(t.current);
+    }
+    const setOpenAllLaneLayer = async (newOpenAllLaneLayer: boolean) => {
+        openAllLaneLayer.current = newOpenAllLaneLayer;
+        _setForRender(_forRender + 1);
+        await play(t.current);
+    }
+    const setInterpolation = async (newPickable: boolean) => {
+        interpolation.current = newPickable;
+        _setForRender(_forRender + 1);
+        await play(t.current);
+    }
+    const setPickable = async (newPickable: boolean) => {
+        pickable.current = newPickable;
+        _setForRender(_forRender + 1);
+        await play(t.current);
+    }
 
     const setT = async (newT: number) => {
         lastT.current = performance.now();
