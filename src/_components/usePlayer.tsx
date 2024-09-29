@@ -132,6 +132,7 @@ const usePlayer = (
                 carPlayer.current.init(),
             ]);
             setLayers([]);
+            await play();
         };
         fetchSim();
 
@@ -151,9 +152,6 @@ const usePlayer = (
 
     // 播放函数，每次播放一帧，改变layers
     const play = async () => {
-        if (!playing.current) {
-            return;
-        }
         // 时间计算
         const nowMs = performance.now();
         const dt = (nowMs - lastT.current) * speed.current / 1000;
@@ -175,7 +173,7 @@ const usePlayer = (
             players.push(roadStatusPlayer.current as IPlayer);
         }
         players = players.filter(p => p !== undefined);
-        console.log(`player: play at ${t.current}`);
+        console.log(`player: play at ${t.current}, interpolation=${interpolation.current}, pickable=${pickable.current}, openMicroLayer=${openMicroLayer.current}, openMacroLayer=${openMacroLayer.current}, openAoiLayer=${openAoiLayer.current}, openAllLaneLayer=${openAllLaneLayer.current}`);
         // 播放计算
         const playT = interpolation.current ? t.current : Math.floor(t.current);
         await Promise.all(players.map(async player => {
@@ -185,6 +183,7 @@ const usePlayer = (
             .map(player => player.play(playT, pickable.current))
             .flat();
         if (openAoiLayer.current) {
+            console.log(`player: add aoi layer, geojson: ${aoiGeoJson}`);
             layers.push(new GeoJsonLayer({
                 id: 'aoi',
                 data: aoiGeoJson,
@@ -199,6 +198,7 @@ const usePlayer = (
             }))
         }
         if (openAllLaneLayer.current) {
+            console.log(`player: add all lane layer, geojson: ${allLaneGeoJson}`);
             layers.push(new GeoJsonLayer({
                 id: 'more-lane',
                 data: allLaneGeoJson,
@@ -214,7 +214,7 @@ const usePlayer = (
         setLayers(layers);
 
         // 播放结束
-        console.log(`player: check end ${t.current} ? ${endT}`);
+        console.log(`player: check end ${t.current} ? ${endT.current}`);
         if (t.current >= endT.current) {
             setPlaying(false);
         }
@@ -229,7 +229,9 @@ const usePlayer = (
 
         if (elapsed > fpsInterval) {
             then.current = now - (elapsed % fpsInterval);
-            play();
+            if (playing.current) {
+                play();
+            }
         }
     };
 

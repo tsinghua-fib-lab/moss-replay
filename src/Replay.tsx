@@ -3,7 +3,7 @@ import { PauseOutlined, PlayCircleOutlined, StepBackwardOutlined, StepForwardOut
 import DeckGL from '@deck.gl/react/typed'
 import { FlyToInterpolator, WebMercatorViewport } from '@deck.gl/core/typed'
 import { _MapContext as MapContext, NavigationControl, StaticMap } from 'react-map-gl'
-import React, { useState } from "react"
+import React, { useEffect, useState } from "react"
 import { Button, Form, Row, Col, Input, Slider, Space, Tooltip, Checkbox, InputNumber, Flex } from "antd"
 import usePlayer from "./_components/usePlayer"
 import moment from "moment"
@@ -104,6 +104,14 @@ export const Replay = (props: {
         props.defaultCarModelPath,
         20,
     )
+
+    // console.log geojsons change
+    useEffect(() => {
+        console.log(`aoiGeoJson changed to ${props.aoiGeoJson.length} features`)
+    }, [props.aoiGeoJson])
+    useEffect(() => {
+        console.log(`allLaneGeoJson changed to ${props.allLaneGeoJson.length} features`)
+    }, [props.allLaneGeoJson])
 
     const layerButtons = (
         <Space direction="horizontal" size="small">
