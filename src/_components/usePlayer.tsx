@@ -82,6 +82,8 @@ const usePlayer = (
         pickable.current = newPickable;
         _setForRender(_forRender + 1);
     }
+    const aoiGeoJsonRef = useRef<GeoJSON.Feature[]>([]);
+    const allLaneGeoJsonRef = useRef<GeoJSON.Feature[]>([]);
 
     // Player对象
     const bound = useRef<LngLatBound>();
@@ -150,6 +152,14 @@ const usePlayer = (
         }
     }, [junctionLaneGeoJson]);
 
+    useEffect(() => {
+        aoiGeoJsonRef.current = aoiGeoJson;
+    }, [aoiGeoJson]);
+
+    useEffect(() => {
+        allLaneGeoJsonRef.current = allLaneGeoJson;
+    }, [allLaneGeoJson]);
+
     // 播放函数，每次播放一帧，改变layers
     const play = async () => {
         // 时间计算
@@ -183,10 +193,10 @@ const usePlayer = (
             .map(player => player.play(playT, pickable.current))
             .flat();
         if (openAoiLayer.current) {
-            console.log(`player: add aoi layer, geojson: ${aoiGeoJson}`);
+            console.log(`player: add aoi layer, geojson: ${aoiGeoJsonRef.current.length}`);
             layers.push(new GeoJsonLayer({
                 id: 'aoi',
-                data: aoiGeoJson,
+                data: aoiGeoJsonRef.current,
                 stroked: true,
                 filled: true,
                 extruded: false,
@@ -198,10 +208,10 @@ const usePlayer = (
             }))
         }
         if (openAllLaneLayer.current) {
-            console.log(`player: add all lane layer, geojson: ${allLaneGeoJson}`);
+            console.log(`player: add all lane layer, geojson: ${allLaneGeoJsonRef.current.length}`);
             layers.push(new GeoJsonLayer({
                 id: 'more-lane',
-                data: allLaneGeoJson,
+                data: allLaneGeoJsonRef.current,
                 stroked: true,
                 filled: true,
                 extruded: false,
