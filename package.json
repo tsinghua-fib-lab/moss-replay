@@ -8,7 +8,7 @@
     },
     "repository": {
         "type": "git",
-        "url": "https://git.fiblab.net/sim/moss-replayer.git"
+        "url": "https://github.com/tsinghua-fib-lab/moss-replay.git"
     },
     "author": "Jun Zhang",
     "license": "MIT",
