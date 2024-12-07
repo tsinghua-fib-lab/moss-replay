@@ -21,7 +21,7 @@ const SPEED_MAP = [1, 2, 5, 10, 30, 60, 120, 300]
 
 const InputJump = ({ layers, onJump }: {
     layers: Layer[],
-    onJump: (center: LngLat) => void
+    onJump: (center: LngLatZoom) => void
 }) => {
     return (
         <Space>
@@ -31,6 +31,7 @@ const InputJump = ({ layers, onJump }: {
                     onJump({
                         lng: parseFloat(values.lng),
                         lat: parseFloat(values.lat),
+                        zoom: 15,
                     })
                 }}
             >
@@ -46,21 +47,35 @@ const InputJump = ({ layers, onJump }: {
                         placeholder="Latitude"
                     />
                 </Form.Item>
-                <Button
-                    type="default"
-                    htmlType="submit"
-                    icon={<DownCircleOutlined />}
-                />
+                <Tooltip title="Jump to the location">
+                    <Button
+                        type="default"
+                        htmlType="submit"
+                        icon={<DownCircleOutlined />}
+                    />
+                </Tooltip>
             </Form>
             <Form
                 layout="inline"
                 onFinish={async (values: any) => {
                     console.log(layers)
                     const pid = parseInt(values.personID)
-                    // onJump({
-                    //     lng: parseFloat(values.lng),
-                    //     lat: parseFloat(values.lat),
-                    // })
+                    for (const layer of layers) {
+                        // filter the layer: car-xxx, pedestrian
+                        if (layer.id.startsWith('car') || layer.id.startsWith('pedestrian')) {
+                            const data = layer.props.data as any[]
+                            for (const d of data) {
+                                if (d.id === pid) {
+                                    onJump({
+                                        lng: d.position[0],
+                                        lat: d.position[1],
+                                        zoom: 16,
+                                    })
+                                    return
+                                }
+                            }
+                        }
+                    }
                 }}
             >
                 <Form.Item name="personID">
@@ -69,11 +84,13 @@ const InputJump = ({ layers, onJump }: {
                         placeholder="Person ID"
                     />
                 </Form.Item>
-                <Button
-                    type="default"
-                    htmlType="submit"
-                    icon={<DownCircleOutlined />}
-                />
+                <Tooltip title="Jump to the person">
+                    <Button
+                        type="default"
+                        htmlType="submit"
+                        icon={<DownCircleOutlined />}
+                    />
+                </Tooltip>
             </Form>
         </Space>
     )
@@ -84,7 +101,7 @@ const InputJump = ({ layers, onJump }: {
 export const Replay = (props: {
     sim: Sim | undefined, // the simulation data
     mapCenter: LngLatZoom, // the current center of the map
-    onSetMapCenter: (center: LngLat) => void, // set the center of the map
+    onSetMapCenter: (center: LngLatZoom) => void, // set the center of the map
     onCarFetch: (startT: number, endT: number, bound?: LngLatBound) => Promise<CarFrame[]>,
     onPedestrianFetch: (startT: number, endT: number, bound?: LngLatBound) => Promise<PedestrianFrame[]>,
     onTLFetch: (startT: number, endT: number, bound?: LngLatBound) => Promise<TLFrame[]>,
