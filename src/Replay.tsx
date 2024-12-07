@@ -4,7 +4,7 @@ import DeckGL from '@deck.gl/react/typed'
 import { FlyToInterpolator, WebMercatorViewport, Layer } from '@deck.gl/core/typed'
 import { _MapContext as MapContext, NavigationControl, StaticMap } from 'react-map-gl'
 import React, { useEffect, useState } from "react"
-import { Button, Form, Row, Col, Input, Slider, Space, Tooltip, Checkbox, InputNumber, Flex } from "antd"
+import { Button, Form, Row, Col, Input, Slider, Space, Tooltip, Checkbox, InputNumber, Flex, message } from "antd"
 import usePlayer from "./_components/usePlayer"
 import moment from "moment"
 import { CarFrame } from './_components/players/Car'
@@ -31,7 +31,7 @@ const InputJump = ({ layers, onJump }: {
                     onJump({
                         lng: parseFloat(values.lng),
                         lat: parseFloat(values.lat),
-                        zoom: 15,
+                        zoom: 18,
                     })
                 }}
             >
@@ -69,13 +69,14 @@ const InputJump = ({ layers, onJump }: {
                                     onJump({
                                         lng: d.position[0],
                                         lat: d.position[1],
-                                        zoom: 16,
+                                        zoom: 18,
                                     })
                                     return
                                 }
                             }
                         }
                     }
+                    message.warning(`Person ${pid} not found in the current visualization area`, 1)
                 }}
             >
                 <Form.Item name="personID">
