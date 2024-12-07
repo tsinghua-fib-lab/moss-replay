@@ -1,7 +1,7 @@
 import ReactDOMServer from 'react-dom/server'
-import { PauseOutlined, PlayCircleOutlined, StepBackwardOutlined, StepForwardOutlined, createFromIconfontCN } from "@ant-design/icons"
+import { DownCircleOutlined, PauseOutlined, PlayCircleOutlined, StepBackwardOutlined, StepForwardOutlined, createFromIconfontCN } from "@ant-design/icons"
 import DeckGL from '@deck.gl/react/typed'
-import { FlyToInterpolator, WebMercatorViewport } from '@deck.gl/core/typed'
+import { FlyToInterpolator, WebMercatorViewport, Layer } from '@deck.gl/core/typed'
 import { _MapContext as MapContext, NavigationControl, StaticMap } from 'react-map-gl'
 import React, { useEffect, useState } from "react"
 import { Button, Form, Row, Col, Input, Slider, Space, Tooltip, Checkbox, InputNumber, Flex } from "antd"
@@ -19,34 +19,64 @@ const IconFont = createFromIconfontCN({
 
 const SPEED_MAP = [1, 2, 5, 10, 30, 60, 120, 300]
 
-const InputJump = ({ onJump }: {
+const InputJump = ({ layers, onJump }: {
+    layers: Layer[],
     onJump: (center: LngLat) => void
 }) => {
-    return <Form
-        layout="inline"
-        onFinish={async (values: any) => {
-            onJump({
-                lng: parseFloat(values.lng),
-                lat: parseFloat(values.lat),
-            })
-        }}
-    >
-        <Form.Item name="lng">
-            <Input
-                type="number"
-                placeholder="Longitude"
-            />
-        </Form.Item>
-        <Form.Item name="lat">
-            <Input
-                type="number"
-                placeholder="Latitude"
-            />
-        </Form.Item>
-        <Button type="default" htmlType="submit">
-            Fly To
-        </Button>
-    </Form>
+    return (
+        <Space>
+            <Form
+                layout="inline"
+                onFinish={async (values: any) => {
+                    onJump({
+                        lng: parseFloat(values.lng),
+                        lat: parseFloat(values.lat),
+                    })
+                }}
+            >
+                <Form.Item name="lng">
+                    <Input
+                        type="number"
+                        placeholder="Longitude"
+                    />
+                </Form.Item>
+                <Form.Item name="lat">
+                    <Input
+                        type="number"
+                        placeholder="Latitude"
+                    />
+                </Form.Item>
+                <Button
+                    type="default"
+                    htmlType="submit"
+                    icon={<DownCircleOutlined />}
+                />
+            </Form>
+            <Form
+                layout="inline"
+                onFinish={async (values: any) => {
+                    console.log(layers)
+                    const pid = parseInt(values.personID)
+                    // onJump({
+                    //     lng: parseFloat(values.lng),
+                    //     lat: parseFloat(values.lat),
+                    // })
+                }}
+            >
+                <Form.Item name="personID">
+                    <Input
+                        type="number"
+                        placeholder="Person ID"
+                    />
+                </Form.Item>
+                <Button
+                    type="default"
+                    htmlType="submit"
+                    icon={<DownCircleOutlined />}
+                />
+            </Form>
+        </Space>
+    )
 }
 
 
@@ -174,7 +204,7 @@ export const Replay = (props: {
                     marginTop: "8px",
                 }} justify='center' align='middle'>
                     <Flex gap="middle" justify="center" align="center">
-                        <InputJump onJump={props.onSetMapCenter} />
+                        <InputJump layers={layers} onJump={props.onSetMapCenter} />
                         {layerButtons}
                         {props.extraHeader}
                     </Flex>
@@ -239,6 +269,8 @@ export const Replay = (props: {
                                                     Angle: {object.angle.toFixed(2)} rad
                                                     <br />
                                                     Speed: {(object.v * 3.6).toFixed(2)} km/h
+                                                    <br />
+                                                    Passengers: {object.numPassengers}
                                                 </p>
                                             </div>
                                         )

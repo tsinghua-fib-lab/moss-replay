@@ -14,6 +14,7 @@ export interface Car {
     direction: number;
     v: number;
     model: string;
+    numPassengers: number;
 }
 
 export interface CarFrame extends Frame {
@@ -75,10 +76,18 @@ export class CarPlayer implements IPlayer {
         // 计算插值比例
         const ratio = (f2.t > f1.t && interpolation) ? (t - f1.t) / (f2.t - f1.t) : 0;
 
-        const data: { [model: string]: { id: number, position: [number, number, number], angle: number, v: number }[] } = {};
+        const data: {
+            [model: string]: {
+                id: number,
+                position: [number, number, number],
+                angle: number,
+                v: number,
+                numPassengers: number,
+            }[]
+        } = {};
         // 计算当前帧要呈现的所有车的位置
         for (const p of f1.data) {
-            let { lng, lat, direction, v } = p;
+            let { lng, lat, direction, v, numPassengers } = p;
             // 检查第二帧
             const f2 = f2Id2Raw.get(p.id);
             if (f2) {
@@ -93,7 +102,13 @@ export class CarPlayer implements IPlayer {
                 p.model = "";
             }
             data[p.model] = data[p.model] || [];
-            data[p.model].push({ id: p.id, position: [lng, lat, 0], angle: direction, v: v });
+            data[p.model].push({
+                id: p.id,
+                position: [lng, lat, 0],
+                angle: direction,
+                v: v,
+                numPassengers: numPassengers,
+            });
         }
 
         const layers = Object.keys(data).map((model) => {
